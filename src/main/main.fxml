@@ -11,14 +11,26 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
 
-<Pane prefHeight="280.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Main">
+<Pane prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Main">
     <children>
-        <Label layoutX="22.0" layoutY="35.0" prefHeight="17.0" prefWidth="152.0" text="Sign up" GridPane.rowIndex="1" />
-        <TextField fx:id="sName" layoutX="22.0" layoutY="56.0" prefHeight="25.0" prefWidth="149.0" promptText="Name" GridPane.rowIndex="2" />
-        <TextField fx:id="sEmail" layoutX="24.0" layoutY="91.0" promptText="E-mail" GridPane.rowIndex="3" />
-        <PasswordField fx:id="sPassword" layoutX="24.0" layoutY="126.0" promptText="Password" GridPane.rowIndex="4" />
-        <ComboBox fx:id="role" layoutX="23.0" layoutY="161.0" prefWidth="150.0" promptText="Choose your role" GridPane.rowIndex="5">
+        <StackPane>
+            <ImageView>
+                <image>
+                    <Image requestedHeight="400" requestedWidth="500" url="@../resources/bg.jpg" />
+                </image>
+            </ImageView>
+        </StackPane>
+        <Label layoutX="75.0" layoutY="40.0" prefHeight="17.0" prefWidth="152.0" text="Sign up" textFill="#f7f7f7" GridPane.rowIndex="1">
+         <font>
+            <Font size="18.0" />
+         </font></Label>
+        <TextField fx:id="sName" layoutX="24.0" layoutY="70.0" prefHeight="25.0" prefWidth="170.0" promptText="Name" GridPane.rowIndex="2" />
+        <TextField fx:id="sEmail" layoutX="24.0" layoutY="110.0" prefHeight="25.0" prefWidth="170.0" promptText="E-mail" GridPane.rowIndex="3" />
+        <PasswordField fx:id="sPassword" layoutX="24.0" layoutY="150.0" prefHeight="25.0" prefWidth="170.0" promptText="Password" GridPane.rowIndex="4" />
+        <ComboBox fx:id="role" layoutX="24.0" layoutY="190.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="170.0" promptText="Choose your role" GridPane.rowIndex="5">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Admin" />
@@ -27,17 +39,16 @@
                 </FXCollections>
             </items>
         </ComboBox>
-        <Button fx:id="getOTP" layoutX="24.0" layoutY="196.0" mnemonicParsing="false" onAction="#sendOTP" text="Get OTP" GridPane.rowIndex="6" />
-        <Label layoutX="200.0" layoutY="35.0" text="Log in" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <TextField fx:id="lName" layoutX="200.0" layoutY="56.0" prefHeight="25.0" prefWidth="171.0" promptText="Username" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-        <PasswordField fx:id="lPassword" layoutX="200.0" layoutY="91.0" prefHeight="25.0" prefWidth="171.0" promptText="Password" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-        <Button layoutX="200.0" layoutY="126.0" mnemonicParsing="false" onAction="#gotoUser" text="Log in" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-      <Button fx:id="fp" layoutX="255.0" layoutY="126.0" mnemonicParsing="false" onAction="#forgotPassword" prefHeight="25.0" prefWidth="116.0" text="Forgot password?" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-      <TextField fx:id="sOTP" disable="true" layoutX="24.0" layoutY="231.0" maxWidth="-Infinity" prefHeight="25.0" prefWidth="60.0" promptText="OTP" GridPane.rowIndex="7" />
-      <Button fx:id="signup" disable="true" layoutX="116.0" layoutY="231.0" mnemonicParsing="false" onAction="#goToSignup" text="Sign up" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
-      <ImageView fitHeight="46.0" fitWidth="47.0" layoutX="363.0" layoutY="-1.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
-         <image>
-            <Image url="@../resources/logo.jpg" />
-         </image></ImageView>
+        <Button fx:id="getOTP" layoutX="24.0" layoutY="230.0" mnemonicParsing="false" onAction="#sendOTP" text="Get OTP" GridPane.rowIndex="6" />
+        <Label layoutX="355.0" layoutY="40.0" text="Log in" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1">
+         <font>
+            <Font size="18.0" />
+         </font></Label>
+        <TextField fx:id="lName" layoutX="300.0" layoutY="70.0" prefHeight="25.0" prefWidth="170.0" promptText="Username" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+        <PasswordField fx:id="lPassword" layoutX="300.0" layoutY="110.0" prefHeight="25.0" prefWidth="170.0" promptText="Password" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+        <Button layoutX="300.0" layoutY="150.0" mnemonicParsing="false" onAction="#gotoUser" prefHeight="25.0" text="Log in" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <Button fx:id="fp" layoutX="300.0" layoutY="190.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#forgotPassword" prefHeight="25.0" prefWidth="140.0" text="Forgot password?" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+      <TextField fx:id="sOTP" disable="true" layoutX="24.0" layoutY="270.0" maxWidth="-Infinity" prefHeight="25.0" prefWidth="60.0" promptText="OTP" GridPane.rowIndex="7" />
+      <Button fx:id="signup" disable="true" layoutX="116.0" layoutY="270.0" mnemonicParsing="false" onAction="#goToSignup" text="Sign up" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
     </children>
 </Pane>
