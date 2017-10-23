@@ -244,7 +244,7 @@ public class Main extends Application implements Serializable
 
     public static boolean validity(String trim)
     {
-        if(trim.endsWith("@iiitd.ac.in"))
+        if (trim.endsWith("@iiitd.ac.in"))
             return true;
         return true;
     }
@@ -286,12 +286,12 @@ public class Main extends Application implements Serializable
             if (chk.equals("Admin"))
             {
                 ((Node) (event.getSource())).getScene().getWindow().hide();
-                new AdminActivity().start(new Stage());
+                new AdminActivity().go(new Stage(), (Admin) user);
             }
             else if (chk.equals("Faculty"))
             {
                 ((Node) (event.getSource())).getScene().getWindow().hide();
-                new FacultyActivity().start(new Stage());
+                new FacultyActivity().go(new Stage(), (Faculty) user);
             }
             else
             {

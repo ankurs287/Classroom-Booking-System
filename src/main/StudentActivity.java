@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 
 public class StudentActivity extends Application implements Initializable
 {
-    private Student student;
+    private static Student student;
 
     FXMLLoader loader = new FXMLLoader(getClass().getResource("studentactivity.fxml"));
 
@@ -41,14 +41,14 @@ public class StudentActivity extends Application implements Initializable
     @FXML
     private TextField search;
     @FXML
-    private TextField tname;
+    private Label tname;
 
     @Override
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("studentactivity.fxml"));
         primaryStage.setTitle("My Classroom- Student");
-        primaryStage.setScene(new Scene(root, 500, 380));
+        primaryStage.setScene(new Scene(root, 500, 400));
         primaryStage.setResizable(false);
         primaryStage.show();
 
@@ -75,8 +75,8 @@ public class StudentActivity extends Application implements Initializable
 
     public void myCoursesListener()
     {
-//        tname.setText("Welcome, ");
         System.out.println(student.getName());
+        coursesList.getItems().clear();
         try
         {
             if (coursesList.getItems().size() != 0)
@@ -111,6 +111,7 @@ public class StudentActivity extends Application implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-//        tname.setText("Welcome, "+student.getName());
+//        System.out.println("asa");
+        tname.setText("Welcome, "+student.getName());
     }
 }

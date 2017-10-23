@@ -8,18 +8,19 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 
-<Pane prefHeight="343.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.StudentActivity">
-    <ImageView fitHeight="40.0" fitWidth="67.0" layoutX="343.0" layoutY="-1.0" pickOnBounds="true" preserveRatio="true">
-        <image>
-            <Image url="@../resources/logo.jpg" />
-        </image></ImageView>
-    <TabPane fx:id="tabPane" layoutY="39.0" prefHeight="304.0" prefWidth="400.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0" tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<Pane prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.StudentActivity">
+    <!--<StackPane>-->
+        <!--<ImageView>-->
+            <!--<image>-->
+                <!--<Image requestedHeight="400" requestedWidth="500" url="@../resources/bg.jpg" />-->
+            <!--</image>-->
+        <!--</ImageView>-->
+    <!--</StackPane>-->
+    <TabPane fx:id="tabPane" layoutY="39.0" prefHeight="360.0" prefWidth="500.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0" tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
         <tabs>
             <Tab fx:id="tab1">
                 <graphic>
@@ -28,23 +29,23 @@
                     </StackPane>
                 </graphic>
                 <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <Pane maxHeight="1.7976931348623157E308" maxWidth="500.0" minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
                         <children>
                             <!--<Label layoutX="14.0" layoutY="18.0" text="List of Courses"/>-->
-                            <TextField fx:id="search" layoutX="11.0" layoutY="14.0" prefWidth="200" promptText="search" />
+                            <TextField fx:id="search" layoutX="11.0" layoutY="14.0" prefHeight="25.0" prefWidth="377.0" promptText="search" />
                             <RadioButton fx:id="myCourses" layoutX="11.0" layoutY="48.0" mnemonicParsing="false" onAction="#myCoursesListener" selected="true" text="My Courses">
                                 <toggleGroup>
                                     <ToggleGroup fx:id="course" />
                                 </toggleGroup>
                             </RadioButton>
                             <RadioButton fx:id="allCourses" layoutX="105.0" layoutY="48.0" mnemonicParsing="false" onAction="#setAllCoursesListener" text="All Courses" toggleGroup="$course" />
-                            <ListView fx:id="coursesList" layoutX="14.0" layoutY="69.0" prefHeight="217.0" prefWidth="235.0">
+                            <ListView fx:id="coursesList" layoutX="14.0" layoutY="69.0" prefHeight="287.0" prefWidth="372.0">
                                 <placeholder>
                                     <Label text="Nothing found" />
                                 </placeholder>
                             </ListView>
                         </children>
-                    </AnchorPane>
+                    </Pane>
                 </content>
             </Tab>
             <Tab>
@@ -54,13 +55,16 @@
                     </StackPane>
                 </graphic>
                 <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
                         <children>
-                            <Button layoutX="100.0" layoutY="125.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="92.0" text="Get Room Requests from Students" />
-                            <Button layoutX="100.0" layoutY="44.0" mnemonicParsing="false" text="Book a room" />
-                            <Button layoutX="100.0" layoutY="100.0" mnemonicParsing="false" text="Cancel a room" />
+                            <Button layoutX="224.0" layoutY="88.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="160.0" text="View Available Rooms" wrapText="true" />
+                            <Button layoutX="224.0" layoutY="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="160.0" text="Book a room" wrapText="true" />
+                            <Button layoutX="224.0" layoutY="165.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="160.0" text="View All Rooms" />
+                     <ListView layoutX="14.0" layoutY="14.0" prefHeight="337.0" prefWidth="182.0" />
+                     <Button layoutX="224.0" layoutY="234.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="160.0" text="Cancel a room" />
+                     <Button layoutX="224.0" layoutY="301.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="160.0" text="Request Status" />
                         </children>
-                    </AnchorPane>
+                    </Pane>
                 </content>
             </Tab>
             <Tab>
@@ -69,6 +73,13 @@
                         <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0" text="My TimeTable" wrapText="true" />
                     </StackPane>
                 </graphic>
+            <content>
+                <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
+                  <children>
+                     <ListView layoutX="14.0" layoutY="14.0" prefHeight="330.0" prefWidth="367.0" />
+                  </children>
+                </Pane>
+            </content>
             </Tab>
             <Tab>
                 <graphic>
@@ -76,9 +87,24 @@
                         <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0" text="My Profile" wrapText="true" />
                     </StackPane>
                 </graphic>
+                <content>
+                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
+                  <children>
+                     <TextField layoutX="186.0" layoutY="193.0" prefHeight="25.0" prefWidth="189.0" />
+                     <TextField layoutX="186.0" layoutY="233.0" prefHeight="25.0" prefWidth="189.0" />
+                     <TextField layoutX="186.0" layoutY="276.0" prefHeight="25.0" prefWidth="189.0" />
+                     <Label layoutX="19.0" layoutY="191.0" prefHeight="29.0" prefWidth="55.0" text="Name" />
+                     <Label layoutX="19.0" layoutY="231.0" prefHeight="29.0" prefWidth="142.0" text="Email" />
+                     <Label layoutX="19.0" layoutY="274.0" prefHeight="29.0" prefWidth="142.0" text="New Password" />
+                     <Button layoutX="265.0" layoutY="313.0" mnemonicParsing="false" text="Change Password" wrapText="true" />
+                      <ImageView fitHeight="108.0" fitWidth="116.0" layoutX="19.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+                      </ImageView>
+                  </children>
+                    </Pane>
+                </content>
             </Tab>
         </tabs>
     </TabPane>
-          <Button layoutX="285.0" layoutY="-1.0" mnemonicParsing="false" onAction="#gotoHome" prefHeight="40.0" prefWidth="62.0" text="Log out" />
-   <TextField fx:id="tname" editable="true"/>
+          <Button layoutX="384.0" mnemonicParsing="false" onAction="#gotoHome" prefHeight="40.0" prefWidth="116.0" text="Log out" />
+   <Label fx:id="tname" prefHeight="40.0" prefWidth="380.0" />
 </Pane>
