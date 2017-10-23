@@ -64,7 +64,7 @@ public class Main extends Application implements Serializable
     {
         Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
         primaryStage.setTitle("My Classroom");
-        primaryStage.setScene(new Scene(root, 400, 280));
+        primaryStage.setScene(new Scene(root, 500, 400));
         primaryStage.setResizable(false);
         primaryStage.show();
     }
