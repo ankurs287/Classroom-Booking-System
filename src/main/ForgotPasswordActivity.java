@@ -44,7 +44,7 @@ public class ForgotPasswordActivity extends Application
     {
         Parent root = FXMLLoader.load(getClass().getResource("forgotpasswordactivity.fxml"));
         primaryStage.setTitle("My Classroom");
-        primaryStage.setScene(new Scene(root, 300, 160));
+        primaryStage.setScene(new Scene(root, 450, 275));
         primaryStage.setResizable(false);
         primaryStage.show();
     }

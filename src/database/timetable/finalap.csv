@@ -1,0 +1,17 @@
+Mandatory/Elective,Course Name ,Course Code,Instructor,Credits,Acronym,Monday Time$Venue,Tuesday Time$Venue,Wednesday Time$Venue,Thurday Time$Venue,Friday Time$Venue
+Mandatory,Discrete Mathematics,CSE121,Donghoon Chang,4,DM,-,1:30-3:00$c21,-,-,11:30-2:00$c21
+Mandatory,Advanced Programming,CSE201,Vivek Kumar,4,AP,11:00-12:00$c21,-,11:00-12:00$c21,11:00-12:00$c21,-
+Mandatory,Computer Organization,CSE112,Naveen Prakash(G),4,CO,-,-,2:30-4:00$c21,4:00-5:30$c01,-
+Elective,Math-III,MTH203,Sarthok Sircar,4,M-III,-,3:00-4:00$c21,-,3:00-4:00$c21,3:00-4:00$c21
+Elective,Signal & Systems,ECE250,Anubha Gupta,4,S&S,-,11:00-12:00$c21,-,2:00-3:00$c21,2:00-3:00$c21
+Elective,Real Analysis I,MTH2xx,Samaresh Chatterji(V),4,RA,3:00-4:00$c02,10:00-11:00$c02,-,10:00-11:00$c02,-
+Elective,Number Theory,MTH2xx,Anuradha Sharma,4,NT,10:00-11:00$c12,-,10:00-11:00$c12,-,9:30-10:30$c12
+Elective,Perspectives of Knowledge,HSS202,Raj Ayyar (V),4,PoK,4:00-5:30$c24,-,4:00-5:30$c24,-,-
+Elective,Introduction to Psychology,HSS204,Akshay Kumar(V),4,Psy,4:00-5:30$c01,-,4:00-5:30$c01,-,-
+Elective,Theory & Practice of Engineering Ethics,HSS208,Raj Ayyar (V),4,TPEE,-,4:00-5:30$c22,-,-,4:00-5:30$c22
+Elective,Theatre Apperciation,HSS211,Manohar Khushlani(V),4,TA,4:00-5:30$c12,-,4:00-5:30$c12,-,-
+Elective,Key Concepts in Economic Sociology,HSS2ES,Amrit Srinivasan(V),4,ES,-,4:00-5:30$c24,-,-,4:00-5:30$c24
+Elective,Introduction to Digital Ethonography(New),HSS2xx,Shriram Venkatraman,4,IDE,4:00-5:30$c11,-,4:00-5:30$c11,-,-
+Elective,Introduction to Meida In Society: A Public Sphere Approach,HSS2xx,Aasim Khan,4,IMS,-,4:00-5:30$c03,-,-,4:00-5:30$c03
+Elective,Introduction to Socail Informatics(New),HSS2xx,Venkata Ratandeep Suri,4,ISI,-,4:00-5:30$c13,-,-,4:00-5:30$c13
+Elective,Introduction to Poetry,HSS223A,Saumya Kulshreshtha(G),2,PO,-,4:30-6:00$c02,-,-,-

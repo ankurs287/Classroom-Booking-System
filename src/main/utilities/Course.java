@@ -3,14 +3,16 @@ package main.utilities;
 import main.user.Faculty;
 import main.user.User;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class Course
+public class Course implements Serializable
 {
     private String name;
     private ArrayList<Course> prerequisites;
-    private ArrayList<String> timeslot;
-    private ArrayList<Room> room;
+    private String[] timeslot;
+    private String[] room;
     private ArrayList<String> postConditions;
     private int intendedAudience;
     private int credits;
@@ -19,7 +21,7 @@ public class Course
     private String acronym;
     private String instructor;
 
-    public Course(String name, ArrayList<Course> prerequisites, ArrayList<String> timeslot, ArrayList<Room> room,
+    public Course(String name, ArrayList<Course> prerequisites, String[] timeslot, String[] room,
             ArrayList<String> postConditions, int intendedAudience, int credits, String courseType,
             String code, String acronym, String instructor)
     {
@@ -36,24 +38,6 @@ public class Course
         this.instructor = instructor;
     }
 
-    @Override
-    public String toString()
-    {
-        return "Course{" +
-                "name='" + name + '\'' +
-                ", prerequisites=" + prerequisites +
-                ", timeslot=" + timeslot +
-                ", room=" + room +
-                ", postConditions=" + postConditions +
-                ", intendedAudience=" + intendedAudience +
-                ", credits=" + credits +
-                ", courseType='" + courseType + '\'' +
-                ", code='" + code + '\'' +
-                ", acronym='" + acronym + '\'' +
-                ", instructor='" + instructor + '\'' +
-                '}';
-    }
-
     public String getName()
     {
         return name;
@@ -64,12 +48,35 @@ public class Course
         return prerequisites;
     }
 
-    public ArrayList<String> getTimeslot()
+    public String[] getTimeslot()
     {
         return timeslot;
     }
 
-    public ArrayList<Room> getRoom()
+    public void setPostConditions(ArrayList<String> postConditions)
+    {
+        this.postConditions = postConditions;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Course{" +
+                "name='" + name + '\'' +
+                ", prerequisites=" + prerequisites +
+                ", timeslot=" + Arrays.toString(timeslot) +
+                ", room=" + Arrays.toString(room) +
+                ", postConditions=" + postConditions +
+                ", intendedAudience=" + intendedAudience +
+                ", credits=" + credits +
+                ", courseType='" + courseType + '\'' +
+                ", code='" + code + '\'' +
+                ", acronym='" + acronym + '\'' +
+                ", instructor='" + instructor + '\'' +
+                '}';
+    }
+
+    public String[] getRoom()
     {
         return room;
     }

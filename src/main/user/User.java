@@ -1,6 +1,11 @@
 package main.user;
 
+import main.utilities.Room;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public abstract class User implements Serializable
 {
@@ -8,6 +13,7 @@ public abstract class User implements Serializable
     private String email;
     private String type;
     private String password;
+    private HashMap<String, ArrayList<ArrayList<Object>>> bookedRoom; // roomname: "start end reason requestStatus", "start end reason requestStatus"
 
     public User(String name, String email, String type, String password)
     {
@@ -16,6 +22,7 @@ public abstract class User implements Serializable
         this.email = email;
         this.type = type;
         this.password = password;
+        bookedRoom = new HashMap<>();
     }
 
     public User()
@@ -82,5 +89,8 @@ public abstract class User implements Serializable
 
     }
 
-
+    public HashMap<String, ArrayList<ArrayList<Object>>> getBookedRoom()
+    {
+        return bookedRoom;
+    }
 }

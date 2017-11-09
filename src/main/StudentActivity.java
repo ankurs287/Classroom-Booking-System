@@ -2,35 +2,45 @@ package main;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Side;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import main.user.Admin;
 import main.user.Student;
+import main.user.User;
 import main.utilities.Course;
+import main.utilities.Room;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class StudentActivity extends Application implements Initializable
 {
     private static Student student;
+    private static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    private static Stage ps = null;
 
     FXMLLoader loader = new FXMLLoader(getClass().getResource("studentactivity.fxml"));
+
+
+    private MenuItem item1, item2;
 
     @FXML
     private RadioButton myCourses;
@@ -43,16 +53,38 @@ public class StudentActivity extends Application implements Initializable
     @FXML
     private Label tname;
 
+    @FXML
+    private ListView roomList;
+    @FXML
+    private ComboBox sTimeInterval;
+    @FXML
+    private ComboBox eTimeInterval;
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Button btnbook;
+    @FXML
+    private ComboBox day;
+    @FXML
+    private ListView roomList2;
+    @FXML
+    private ComboBox room;
+    @FXML
+    private TextArea reason;
+    @FXML
+    private Button cancel;
+
     @Override
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("studentactivity.fxml"));
+        ps = primaryStage;
         primaryStage.setTitle("My Classroom- Student");
-        primaryStage.setScene(new Scene(root, 500, 400));
+        Scene scene = new Scene(root, 500, 400);
+        scene.getStylesheets().add(getClass().getResource("../resources/application.css").toExternalForm());
+        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
-
-        myCoursesListener();
     }
 
     public void go(Stage stage, Student student) throws Exception
@@ -73,20 +105,33 @@ public class StudentActivity extends Application implements Initializable
         }
     }
 
-    public void myCoursesListener()
+    public void myCoursesListener(ActionEvent event)
     {
+        item1.setDisable(true);
+        item2.setDisable(false);
         System.out.println(student.getName());
-        coursesList.getItems().clear();
         try
+        {
+            coursesList.getItems().clear();
+
+        } catch (Exception e)
+        {
+        }
+
+        try
+
         {
             if (coursesList.getItems().size() != 0)
                 coursesList.getItems().clear();
             if (student.getCourses().isEmpty()) return;
 
-        } catch (NullPointerException e)
+        } catch (
+                NullPointerException e)
+
         {
         }
         try
+
         {
             ArrayList<Course> currMyCourses = student.getCourses();
             for (Course i : currMyCourses)
@@ -95,12 +140,15 @@ public class StudentActivity extends Application implements Initializable
             }
         } catch (Exception e)
         {
-
+            System.out.println("here");
         }
+
     }
 
     public void setAllCoursesListener(ActionEvent event)
     {
+        item2.setDisable(true);
+        item1.setDisable(false);
         coursesList.getItems().clear();
         for (Course i : Main.allCourses)
         {
@@ -111,7 +159,470 @@ public class StudentActivity extends Application implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-//        System.out.println("asa");
-        tname.setText("Welcome, "+student.getName());
+        tname.setText("Welcome, " + student.getName());
+        try
+        {
+            viewAllRooms();
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        item1 = new MenuItem("Join Course");
+        item1.setOnAction(new EventHandler<ActionEvent>()
+        {
+            public void handle(ActionEvent e)
+            {
+                String selectedCourse = coursesList.getSelectionModel().getSelectedItem().toString().trim();
+                try
+                {
+                    for (Course i : student.getCourses())
+                    {
+                        if (i.getName().trim().toString().equals(selectedCourse))
+                        {
+                            System.out.println("You've already joined the course.");
+                            return;
+                        }
+                    }
+                } catch (Exception e1)
+                {
+
+                }
+                for (Course i : Main.allCourses)
+                {
+                    if (i.getName().trim().toString().equals(selectedCourse))
+                    {
+                        student.addCourse(i);
+                        try
+                        {
+                            Main.serialize(student);
+                        } catch (IOException e1)
+                        {
+                            e1.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+        item2 = new MenuItem("Leave Course");
+        item2.setOnAction(new EventHandler<ActionEvent>()
+        {
+            public void handle(ActionEvent e)
+            {
+                System.out.println("Leave Course");
+
+                String selectedCourse = coursesList.getSelectionModel().getSelectedItem().toString().trim();
+                try
+                {
+                    for (Course i : student.getCourses())
+                    {
+                        if (i.getName().trim().toString().equals(selectedCourse))
+                        {
+                            student.getCourses().remove(i);
+                            Main.serialize(student);
+                            myCoursesListener(new ActionEvent());
+                            System.out.println("Course Successfully Removed");
+                            return;
+                        }
+                    }
+                } catch (Exception e1)
+                {
+
+                }
+                System.out.println("It's not your Course.");
+            }
+        });
+
+        final ContextMenu contextMenu = new ContextMenu(item1, item2);
+        contextMenu.setMaxSize(50, 50);
+        contextMenu.setId("contextMenu");
+
+        coursesList.setContextMenu(contextMenu);
+        coursesList.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent me) ->
+        {
+            if (me.getButton() == MouseButton.PRIMARY)
+            {
+                System.out.println("Mouse Left Pressed");
+                contextMenu.show(coursesList, me.getScreenX(), me.getScreenY());
+            }
+            else
+            {
+                contextMenu.hide();
+            }
+        });
+
+        for (int i = 0; i < 7; i++)
+        {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate localDate = LocalDate.now().plusDays(i);
+            day.getItems().add(dtf.format(localDate) + " " + localDate.getDayOfWeek());
+        }
+
+        for (Room r : Main.allRooms)
+            room.getItems().add(r.getName().toUpperCase());
+
+
+        for (int a = 0; a < 24; a++)
+        {
+            try
+            {
+                sTimeInterval.getItems().add(timeInterval(a));
+                eTimeInterval.getItems().add(timeInterval(a));
+                a += 0;
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static int EP(int[] ti, int a, int c)
+    {
+        for (int i = a + 1; i < 24; i++)
+        {
+            if (ti[i] == 1 - c)
+            {
+                return i - 1;
+            }
+        }
+        System.out.println("23");
+        return 23;
+    }
+
+    public void viewAllRooms() throws ParseException
+    {
+        roomList.getItems().clear();
+        SimpleDateFormat format = new SimpleDateFormat("H:mm");
+        for (Room i : Main.allRooms)
+        {
+            Label la1 = new Label(i.getName().toUpperCase());
+            la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white");
+
+            roomList.getItems().add(la1);
+            ArrayList<ArrayList<Date[]>> status = i.getTimeIntevals();
+            for (int d = 0; d < 7; d++)
+            {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate localDate = LocalDate.now().plusDays(d);
+                String temp = dtf.format(localDate) + " " + localDate.getDayOfWeek() + ": ";
+
+                ArrayList<Date[]> ti = status.get(d);
+                for (int a = 0; a < ti.size(); a++)
+                {
+
+                    String sTime = format.format(ti.get(a)[0]);
+                    String eTime = format.format(ti.get(a)[1]);
+
+                    temp += sTime + "-" + eTime + ", ";
+                }
+
+                for (Date[] dd : i.getBooked())
+                {
+                    if (new SimpleDateFormat("dd/MM/yyyy").format(dd[0]).equals(dtf.format(localDate)))
+                    {
+                        temp += new SimpleDateFormat("H:mm").format(dd[0]) + "-" + new SimpleDateFormat("H:mm").format(dd[1]) + ", ";
+                    }
+                }
+                roomList.getItems().add(temp);
+            }
+            roomList.getItems().add("");
+        }
+    }
+
+    private static String timeInterval(int initial) throws ParseException
+    {
+        String time1 = "08:00:00";
+        String time2 = "08:00:00";
+
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        Date date1 = format.parse(time1);
+        Date date2 = format.parse(time2);
+
+        long curTimeInMs = date1.getTime();
+        date2 = new Date(curTimeInMs + ((initial) * 60000 * 30));
+        return new SimpleDateFormat("H:mm").format(date2);
+    }
+
+    public void searchCourse(ActionEvent event)
+    {
+        coursesList.getItems().clear();
+        String[] tbs = search.getText().trim().toString().toLowerCase().split(" ");
+        if (search.getText().trim().toString().isEmpty()) return;
+        for (Course i : Main.allCourses)
+        {
+            String j = i.getPostConditions().toString();
+            for (String tbss : tbs)
+            {
+                if (j.toLowerCase().indexOf(tbss) != -1 || i.getName().toLowerCase().indexOf(tbss) != -1)
+                {
+                    coursesList.getItems().add(i.getName());
+                    break;
+                }
+            }
+        }
+    }
+
+    public void bookRoom(ActionEvent event) throws ParseException, IOException
+    {
+        SimpleDateFormat format = new SimpleDateFormat("H:mm");
+        if (room.getSelectionModel().isEmpty())
+        {
+            System.out.println("Select Room.");
+            Main.callPop("Select Room");
+        }
+        else if (day.getSelectionModel().isEmpty())
+        {
+            System.out.println("Select Date");
+            Main.callPop("Select Date");
+        }
+        else if (sTimeInterval.getSelectionModel().isEmpty())
+        {
+            System.out.println("Select Start Time");
+            Main.callPop("Select Start Time");
+        }
+        else if (eTimeInterval.getSelectionModel().isEmpty())
+        {
+            System.out.println("Select End Time");
+            Main.callPop("Select End Time");
+        }
+        else if (reason.getText().toString().trim().isEmpty())
+        {
+            Main.callPop("Please enter the reason.");
+        }
+        else
+        {
+            String roomname = room.getSelectionModel().getSelectedItem().toString().toLowerCase();
+            String Day = day.getSelectionModel().getSelectedItem().toString();
+            String s = sTimeInterval.getSelectionModel().getSelectedItem().toString();
+            String e = eTimeInterval.getSelectionModel().getSelectedItem().toString();
+            Date startTime = format.parse(s);
+            Date endTime = format.parse(e);
+            if (startTime.compareTo(endTime) >= 0)
+            {
+                Main.callPop("Select a valid interval.");
+                return;
+            }
+
+            int dayIndex = -1;
+            for (int i = 0; i < 7; i++)
+            {
+                if (Day.split(" ")[1].equals(days[i].toUpperCase()))
+                {
+                    dayIndex = i;
+                    break;
+                }
+            }
+
+            Room r = null;
+            ArrayList<ArrayList<Date[]>> status = new ArrayList<>();
+            for (Room room : Main.allRooms)
+            {
+                if (room.getName().equals(roomname))
+                {
+                    status = room.getTimeIntevals();
+                    r = room;
+                    break;
+                }
+            }
+
+            System.out.println(r + " " + roomname + " " + Day + " " + format.format(startTime) + " " + format.format(endTime));
+            boolean avail = true;
+            for (int i = 0; i < status.get(dayIndex).size(); i++)
+            {
+                if (!(startTime.compareTo(status.get(dayIndex).get(i)[1]) >= 0 || endTime.compareTo(status.get(dayIndex).get(i)[0]) <= 0))
+                {
+                    avail = false;
+                    System.out.println("Room Not Available");
+                    Main.callPop("Room Not Available");
+                    return;
+                }
+            }
+
+            format = new SimpleDateFormat("dd/MM/yyyy H:mm");
+            startTime = format.parse(Day.split(" ")[0] + " " + s);
+            endTime = format.parse(Day.split(" ")[0] + " " + e);
+            for (int i = 0; i < r.getBooked().size(); i++)
+            {
+                Date[] whole = r.getBooked().get(i);
+                SimpleDateFormat onlyDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                if (!(onlyDateFormat.format(startTime).equals(onlyDateFormat.format(whole[0]))))
+                {
+                    continue;
+                }
+
+                if (!(startTime.compareTo(whole[1]) >= 0 || endTime.compareTo(whole[0]) <= 0))
+                {
+                    avail = false;
+                    System.out.println("Room Not Available");
+                    Main.callPop("Room Not Available");
+                    return;
+                }
+            }
+            if (avail)
+            {
+                System.out.println("Room Available");
+                sendRequest(r, Day, s, e);
+                r.getBooked().add(new Date[]{format.parse(Day.split(" ")[0] + " " + s), format.parse(Day.split(" ")[0] + " " + e)});
+//                if(1==1) return;
+
+                HashMap<String, ArrayList<ArrayList<Object>>> br = student.getBookedRoom();
+                if (br.containsKey(r.getName()))
+                {
+                    ArrayList<Object> ar = new ArrayList<Object>();
+                    ar.add(format.parse(Day.split(" ")[0] + " " + s));
+                    ar.add(format.parse(Day.split(" ")[0] + " " + e));
+                    ar.add(reason.getText().toString().trim());
+                    ar.add((boolean) false);
+                    br.get(r.getName()).add(ar);
+                    System.out.println(br.toString());
+                }
+                else
+                {
+                    ArrayList<Object> ar = new ArrayList<Object>();
+                    ar.add(format.parse(Day.split(" ")[0] + " " + s));
+                    ar.add(format.parse(Day.split(" ")[0] + " " + e));
+                    ar.add(reason.getText().toString().trim());
+                    ar.add((boolean) false);
+                    ArrayList<ArrayList<Object>> arr = new ArrayList<>();
+                    arr.add(ar);
+                    br.put(r.getName(), arr);
+                    System.out.println(br.toString());
+                }
+                viewAllRooms();
+            }
+            else
+            {
+                System.out.println("Room Not Available");
+                Main.callPop("Room Not Available");
+            }
+            for (int i = 0; i < r.getBooked().size(); i++)
+            {
+//                System.out.println(format.format(r.getBooked().get(i)[0]) + " " + format.format(r.getBooked().get(i)[1]));
+            }
+        }
+    }
+
+    private void sendRequest(Room r, String Day, String s, String e) throws ParseException
+    {
+        Admin ad = null;
+        for (User u : Main.allUsers)
+        {
+            if (u.getType().equals("Admin"))
+            {
+                ad = (Admin) u;
+            }
+        }
+
+        HashMap<String, ArrayList<ArrayList<Object>>> br = Admin.requests;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy H:mm");
+        if (br.containsKey(r.getName()))
+        {
+            ArrayList<Object> ar = new ArrayList<Object>();
+            ar.add(student);
+            ar.add(format.parse(Day.split(" ")[0] + " " + s));
+            ar.add(format.parse(Day.split(" ")[0] + " " + e));
+            ar.add(reason.getText().toString().trim());
+            br.get(r.getName()).add(ar);
+            System.out.println(br.toString());
+        }
+        else
+        {
+            ArrayList<Object> ar = new ArrayList<Object>();
+            ar.add(student);
+            ar.add(format.parse(Day.split(" ")[0] + " " + s));
+            ar.add(format.parse(Day.split(" ")[0] + " " + e));
+            ar.add(reason.getText().toString().trim());
+            ArrayList<ArrayList<Object>> arr = new ArrayList<>();
+            arr.add(ar);
+            br.put(r.getName(), arr);
+            System.out.println(br.toString());
+        }
+        Main.callPop("Request sent to Admin.");
+    }
+
+    public void bookedRoom()
+    {
+        roomList2.getItems().clear();
+        if (student.getBookedRoom() == null)
+        {
+            roomList2.getItems().add("No Room is Booked.");
+            Main.callPop("No Room is Booked.");
+        }
+        else
+        {
+            for (String k : student.getBookedRoom().keySet())
+            {
+                for (ArrayList<Object> i : student.getBookedRoom().get(k))
+                {
+                    SimpleDateFormat format = new SimpleDateFormat("H:mm");
+                    Label la1 = new Label(k.toUpperCase());
+                    la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
+
+                    roomList2.getItems().add(la1);
+                    roomList2.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
+                    roomList2.getItems().add("Reason: " + i.get(2));
+                    if ((boolean) i.get(3))
+                    {
+                        roomList2.getItems().add("Request Status: Accepted");
+                    }
+                    else
+                    {
+                        roomList2.getItems().add("Request Status: Pending");
+                    }
+                    Button cancel = new Button("Cancel Booking");
+                    cancel.setOnAction(new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent event)
+                        {
+                            for (Room r : Main.allRooms)
+                            {
+                                if (r.getName().equals(k))
+                                {
+                                    ArrayList<Date[]> da = r.getBooked();
+                                    for (Date[] dd : da)
+                                    {
+                                        if ((dd[0].compareTo((Date) i.get(0)) == 0) && dd[1].compareTo((Date) i.get(1)) == 0)
+                                        {
+                                            try
+                                            {
+                                                da.remove(dd);
+                                            } catch (Exception e)
+                                            {
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                                student.getBookedRoom().get(k).remove(i);
+                                roomList2.getItems().clear();
+                                bookedRoom();
+                                roomList.getItems().clear();
+                                try
+                                {
+                                    viewAllRooms();
+                                } catch (ParseException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                    roomList2.getItems().add(cancel);
+                }
+            }
+        }
+    }
+
+    public void searchCoursekey(KeyEvent keyEvent)
+    {
+        coursesList.getItems().clear();
+        searchCourse(new ActionEvent());
+    }
+
+    public void refresh(MouseEvent mouseEvent) throws ParseException
+    {
+        viewAllRooms();
     }
 }

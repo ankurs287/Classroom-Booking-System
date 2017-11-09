@@ -4,11 +4,13 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import main.user.Admin;
 import main.user.Faculty;
@@ -16,6 +18,7 @@ import main.user.Student;
 import main.user.User;
 import main.utilities.Course;
 import main.utilities.Room;
+import main.utilities.Timetable;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -24,17 +27,21 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Properties;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
-public class Main extends Application implements Serializable
+public class Main extends Application implements Serializable, Initializable
 {
     private static final String FILENAME = (new File("").getAbsolutePath());
     static ArrayList<Course> allCourses = new ArrayList<>();
-    static ArrayList<Room> allRooms = new ArrayList<>();
+    public static HashSet<Room> allRooms = new HashSet<Room>();
     public static ArrayList<User> allUsers = new ArrayList<>();
     private int otp = -1;
+    public static Popup popup = new Popup();
 
     @FXML
     private GridPane pane;
@@ -64,18 +71,20 @@ public class Main extends Application implements Serializable
     {
         Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
         primaryStage.setTitle("My Classroom");
-        primaryStage.setScene(new Scene(root, 500, 400));
+        Scene scene = new Scene(root, 500, 320);
+        scene.getStylesheets().add(getClass().getResource("../resources/application.css").toExternalForm());
+        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, ParseException
     {
         syncDB(); //sync Database
         launch(args);
     }
 
-    private static void syncDB() throws IOException
+    private static void syncDB() throws IOException, ParseException
     {
         // Users Record
         File directory = new File(FILENAME + "/src/database/users/");
@@ -89,27 +98,85 @@ public class Main extends Application implements Serializable
         }
         System.out.println(allUsers);
 
-        // All Courses
-        BufferedReader br = new BufferedReader(new FileReader(FILENAME + "/src/database/timetable/timetable.csv"));
+        // All Courses & All Rooms
+        BufferedReader br = new BufferedReader(new FileReader(FILENAME + "/src/database/timetable/finalap.csv"));
         String line = null;
         br.readLine();
-        while ((line = br.readLine()) != null)
+        while ((line = br.readLine()) != null) // one course per line
         {
             String[] data = line.split(",");
 
-            ArrayList<String> tempTimeslot = new ArrayList<>();
-            for (int i = 6; i <= 10; i++)
-                tempTimeslot.add(data[i]);
+            String[] tempTimeslot = new String[5];
+            String[] tempRooms = new String[5];
 
-            Course temp = new Course(data[1], new ArrayList<Course>(), tempTimeslot, new ArrayList<Room>(), new ArrayList<String>(),
+            for (int i = 6; i <= 10; i++)
+            {
+                if (data[i].indexOf("$") == -1)
+                {
+                    tempTimeslot[i - 6] = "-";
+                    tempRooms[i - 6] = "-";
+                }
+                else
+                {
+                    data[i] = data[i].replace("$", " ");
+                    tempTimeslot[i - 6] = data[i].split(" ")[0];
+                    tempRooms[i - 6] = data[i].split(" ")[1];
+
+                    allRooms.add(new Room(data[i].split(" ")[1], 100));
+
+                    SimpleDateFormat format = new SimpleDateFormat("H:mm");
+                    for (Room r : allRooms)
+                    {
+                        if (r.getName().equals(tempRooms[i - 6]))
+                        {
+                            String[] tis = tempTimeslot[i - 6].split("-");
+                            if (Integer.parseInt(tis[0].split(":")[0]) < 8)
+                            {
+                                tis[0] = Integer.parseInt(tis[0].split(":")[0]) + 12 + ":" + tis[0].split(":")[1];
+                            }
+                            if (Integer.parseInt(tis[1].split(":")[0]) < 8)
+                            {
+                                tis[1] = Integer.parseInt(tis[1].split(":")[0]) + 12 + ":" + tis[1].split(":")[1];
+                            }
+
+                            ArrayList<ArrayList<Date[]>> temp = r.getTimeIntevals();
+                            temp.get(i - 6).add(new Date[]{format.parse(tis[0]), format.parse(tis[1])});
+                            break;
+                        }
+                    }
+                }
+            }
+            Course temp = new Course(data[1], new ArrayList<Course>(), tempTimeslot, tempRooms, new ArrayList<String>(),
                     100, Integer.parseInt(data[4]), data[0], data[2], data[5], data[3]);
 
             allCourses.add(temp);
         }
-        System.out.println(allCourses);
+        System.out.println(allRooms.toString());
 
-        // All rooms
-
+//        All Courses Post Condition
+        br = new BufferedReader(new FileReader(FILENAME + "/src/database/timetable/Post-Conditions_Monsoon-2016.csv"));
+        line = null;
+        br.readLine();
+        while ((line = br.readLine()) != null) // one course per line
+        {
+            String[] data = line.split(",");
+            for (Course i : allCourses)
+            {
+                if (i.getName().toLowerCase().equals(data[1].toLowerCase()))
+                {
+                    i.setPostConditions(new ArrayList<String>()
+                    {{
+                        add(data[3]);
+                        add(data[4]);
+                        add(data[5]);
+                        add(data[6]);
+                        add(data[7]);
+                    }});
+                    break;
+                }
+            }
+        }
+        System.out.println(allCourses.toString());
     }
 
     private static User deserialize(String name) throws IOException
@@ -130,6 +197,8 @@ public class Main extends Application implements Serializable
 
     public void sendOTP(ActionEvent event) throws Exception
     {
+        goToSignup(new ActionEvent());
+        if (1 == 1) return;
         if (sName.getText().trim().toString().isEmpty() || sEmail.getText().trim().toString().isEmpty() || sPassword.getText().toString().isEmpty())
         {
             System.out.println("All fields are mandatory.");
@@ -152,7 +221,7 @@ public class Main extends Application implements Serializable
             int randomPIN = (int) (Math.random() * 9000) + 1000;
             otp = randomPIN;
             final String user = "classroom.booking.system@gmail.com";//change accordingly
-            final String password = "ankur+anvit";//change accordingly
+            final String password = "";//change accordingly
 
             String to = sEmail.getText().trim().toString();//change accordingly
 
@@ -211,19 +280,19 @@ public class Main extends Application implements Serializable
         {
             System.out.println("Enter correct OTP sent to your Email id.");
             sOTP.clear();
-            return;
+//            return;
         }
         if (chk.equals("Admin"))
         {
-            user = new Admin(sName.getText().trim().toString(), sEmail.getText().trim().toString(), "Admin", sPassword.getText().toString());
+            user = new Admin(sName.getText().trim().toString(), sEmail.getText().trim().toString().toLowerCase(), "Admin", sPassword.getText().toString());
         }
         else if (chk.equals("Faculty"))
         {
-            user = new Faculty(sName.getText().trim().toString(), sEmail.getText().trim().toString(), "Faculty", sPassword.getText().toString());
+            user = new Faculty(sName.getText().trim().toString(), sEmail.getText().trim().toString().toLowerCase(), "Faculty", sPassword.getText().toString(), new ArrayList<Course>());
         }
         else
         {
-            user = new Student(sName.getText().trim().toString(), sEmail.getText().trim().toString(), "Student", sPassword.getText().toString());
+            user = new Student(sName.getText().trim().toString(), sEmail.getText().trim().toString().toLowerCase(), "Student", sPassword.getText().toString(), new ArrayList<Course>(), new Timetable());
         }
         serialize(user);
         allUsers.add(user);
@@ -249,7 +318,7 @@ public class Main extends Application implements Serializable
         return true;
     }
 
-    public void serialize(User user) throws IOException
+    public static void serialize(User user) throws IOException
     {
         ObjectOutputStream out = null;
         try
@@ -275,7 +344,7 @@ public class Main extends Application implements Serializable
         }
         else
         {
-            User user = searchUser(lName.getText().trim().toString(), lPassword.getText().toString());
+            User user = searchUser(lName.getText().trim().toString().toLowerCase(), lPassword.getText().toString());
             if (user == null)
             {
                 System.out.println("Username or Password incorrect.");
@@ -314,5 +383,79 @@ public class Main extends Application implements Serializable
     {
         ((Node) (event.getSource())).getScene().getWindow().hide();
         new ForgotPasswordActivity().start(new Stage());
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources)
+    {
+//        updateRoomValidity();
+    }
+
+    public static void callPop(String text)
+    {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(text);
+        alert.showAndWait();
+//        final Popup popup = new Popup();
+//        Pane pp = new Pane();
+//        pp.setMinWidth(300);
+//        pp.setMinHeight(100);
+//        pp.setStyle("-fx-background-color: #213752; -fx-border-color: black; -fx-border-width: 300%");
+//        Label l = new Label("Select Room");
+//        l.setTextAlignment(TextAlignment.CENTER);
+//        l.setAlignment(Pos.TOP_CENTER);
+//        l.setLayoutY(16);
+//        l.setStyle("-fx-font-size: 18");
+//        l.setPrefHeight(61);
+//        l.setPrefWidth(300);
+//        l.setTextFill(Paint.valueOf("#ffffff"));
+//        Button b = new Button("OK");
+//        b.setLayoutX(134);
+//        b.setLayoutY(67);
+//        b.setOnAction(new EventHandler<ActionEvent>()
+//        {
+//            @Override
+//            public void handle(ActionEvent event)
+//            {
+//                popup.hide();
+//            }
+//        });
+//        pp.getChildren().addAll(l, b);
+//        popup.getContent().add(pp);
+//        popup.setX(ps.getX() + 150);
+//        popup.setY(ps.getY() + 160);
+//        popup.show(ps);
+    }
+
+    public static void updateRoomValidity()
+    {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate localDate = LocalDate.now().plusDays(1);
+        for (Room i : allRooms)
+        {
+            for (Date[] j : i.getBooked())
+            {
+                if (j[0].compareTo(java.sql.Date.valueOf(localDate)) >= 0)
+                {
+                    i.getBooked().remove(j);
+                }
+            }
+        }
+        for (User i : allUsers)
+        {
+            for (String s : i.getBookedRoom().keySet())
+            {
+                for (ArrayList<Object> j : i.getBookedRoom().get(s))
+                {
+                    Date dd= (Date)j.get(0);
+                    if(dd.compareTo(java.sql.Date.valueOf(localDate)) >= 0)
+                    {
+                        i.getBookedRoom().get(s).remove(j);
+                    }
+                }
+            }
+        }
     }
 }

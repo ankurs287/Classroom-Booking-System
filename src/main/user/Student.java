@@ -8,18 +8,18 @@ import java.util.Currency;
 
 public class Student extends User
 {
-    ArrayList<Course> courses;
-    Timetable myTimetable;
+    ArrayList<Course> courses = new ArrayList<>();
+    Timetable myTimetable = new Timetable();
 
-    public Student(String name, String email, String type, String password)
+    public Student(String name, String email, String type, String password, ArrayList<Course> courses, Timetable myTimetable)
     {
         super(name, email, type, password);
-    }
-
-    public Student(ArrayList<Course> courses, Timetable myTimetable)
-    {
         this.courses = courses;
         this.myTimetable = myTimetable;
+    }
+
+    public Student()
+    {
     }
 
     public ArrayList<Course> getCourses()

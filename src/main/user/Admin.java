@@ -1,13 +1,20 @@
 package main.user;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Admin extends User
 {
+    public static HashMap<String, ArrayList<ArrayList<Object>>> requests = new HashMap<>(); // roomname: "user start end reason", "user start end reason"
+
     public Admin(String name, String email, String type, String password)
     {
         super(name, email, type, password);
     }
 
-    public Admin(){}
+    public Admin()
+    {
+    }
 
     @Override
     public boolean cancelRoomBooking()
@@ -21,8 +28,8 @@ public class Admin extends User
         return false;
     }
 
-    public void getRoomsRequests()
+    public HashMap<String, ArrayList<ArrayList<Object>>> getRequests()
     {
-
+        return requests;
     }
 }
