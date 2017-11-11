@@ -1,6 +1,10 @@
 package main;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -10,8 +14,10 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import main.user.Faculty;
 import main.user.User;
 import main.utilities.Course;
@@ -23,10 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class FacultyActivity extends Application implements Initializable
 {
@@ -41,6 +44,14 @@ public class FacultyActivity extends Application implements Initializable
     private ComboBox sTimeInterval, eTimeInterval, day, room;
     @FXML
     private TextArea reason;
+    @FXML
+    private TableView<ArrayList<String>> tableView;
+    @FXML
+    private TableView<Course> coursesTable;
+    @FXML
+    private TableColumn<Course, String> name, code, credits, instructor;
+    @FXML
+    private RadioButton myCourses, allCourses, roomsDetail, roomsBooked;
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -76,13 +87,157 @@ public class FacultyActivity extends Application implements Initializable
     public void initialize(URL location, ResourceBundle resources)
     {
         tname.setText("Welcome, " + faculty.getName());
-        try
+        coursesTable.setRowFactory(new Callback<TableView<Course>, TableRow<Course>>()
         {
-            viewAllRooms();
-        } catch (ParseException e)
+            @Override
+            public TableRow<Course> call(TableView<Course> tableView)
+            {
+                final TableRow<Course> row = new TableRow<>();
+                final ContextMenu contextMenu = new ContextMenu();
+
+                final MenuItem joinMenuItem = new MenuItem("Join Course");
+                joinMenuItem.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent event)
+                    {
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
+                        try
+                        {
+                            for (Course i : faculty.getCourses())
+                            {
+                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                {
+                                    System.out.println("You've already joined the course.");
+                                    return;
+                                }
+                            }
+                        } catch (Exception e1)
+                        {
+
+                        }
+                        for (Course i : Main.allCourses)
+                        {
+                            if (i.getCode().trim().toString().equals(selectedCourse))
+                            {
+                                faculty.addCourse(i);
+                                System.out.println("Course Added.");
+                                try
+                                {
+                                    Main.serialize(faculty, "users/" + faculty.getName());
+                                } catch (IOException e1)
+                                {
+                                    e1.printStackTrace();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+                joinMenuItem.setStyle("-fx-font-size: 13;");
+
+                final MenuItem removeMenuItem = new MenuItem("Leave Course");
+                removeMenuItem.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent event)
+                    {
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
+                        try
+                        {
+                            for (Course i : faculty.getCourses())
+                            {
+                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                {
+                                    faculty.getCourses().remove(i);
+                                    Main.serialize(faculty, "users/" + faculty.getName());
+                                    if (myCourses.isSelected()) myCoursesListener();
+                                    System.out.println("Course Successfully Removed");
+                                    return;
+                                }
+                            }
+                        } catch (Exception e1)
+                        {
+
+                        }
+                        System.out.println("It's not your Course.");
+                    }
+                });
+                removeMenuItem.setStyle("-fx-font-size: 13;");
+
+
+//                contextMenu.getItems().addAll(joinMenuItem, removeMenuItem);
+
+                if (allCourses.isSelected())
+                {
+                    contextMenu.getItems().addAll(joinMenuItem);
+//                    removeMenuItem.setDisable(true);
+//                    joinMenuItem.setDisable(false);
+                }
+                else if (myCourses.isSelected())
+                {
+//                    joinMenuItem.setDisable(true);
+//                    removeMenuItem.setDisable(false);
+                    contextMenu.getItems().addAll(removeMenuItem);
+                }
+                else
+                {
+                    contextMenu.getItems().addAll(joinMenuItem, removeMenuItem);
+                }
+                // Set context menu on row, but use a binding to make it only show for non-empty rows:
+                row.contextMenuProperty().bind(
+                        Bindings.when(row.emptyProperty())
+                                .then((ContextMenu) null)
+                                .otherwise(contextMenu)
+                );
+                return row;
+            }
+        });
+
+        name.setCellValueFactory(new PropertyValueFactory<Course, String>("name"));
+        code.setCellValueFactory(new PropertyValueFactory<Course, String>("code"));
+        credits.setCellValueFactory(new PropertyValueFactory<Course, String>("credits"));
+        instructor.setCellValueFactory(new PropertyValueFactory<Course, String>("instructor"));
+
+        name.setCellFactory(col ->
         {
-            e.printStackTrace();
-        }
+            TableCell<Course, String> cell = new TableCell<Course, String>()
+            {
+                @Override
+                public void updateItem(String item, boolean empty)
+                {
+                    super.updateItem(item, empty);
+                    if (item != null)
+                    {
+                        Label text = new Label(item);
+                        text.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14;");
+                        text.setWrapText(true);
+                        this.setGraphic(text);
+                    }
+                }
+            };
+            return cell;
+        });
+        instructor.setCellFactory(col ->
+        {
+            TableCell<Course, String> cell = new TableCell<Course, String>()
+            {
+                @Override
+                public void updateItem(String item, boolean empty)
+                {
+                    super.updateItem(item, empty);
+                    if (item != null)
+                    {
+                        Label text = new Label(item);
+                        text.setStyle("-fx-text-fill: white;");
+                        text.setWrapText(true);
+                        this.setGraphic(text);
+                    }
+                }
+            };
+            return cell;
+        });
+        
         for (int i = 0; i < 7; i++)
         {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -381,19 +536,113 @@ public class FacultyActivity extends Application implements Initializable
         return new SimpleDateFormat("H:mm").format(date2);
     }
 
-    private void myCourses()
+    public void myCoursesListener()
     {
-        for (Course c: Main.allCourses)
-        {
-            if(c.getInstructor().toLowerCase().equals(faculty.getName()))
-            {
-                coursesList.getItems().add(c.getName());
-            }
-        }
+//        item1.setDisable(true);
+//        item2.setDisable(false);
+        coursesTable.setItems(null);
+        if (faculty.getCourses().isEmpty()) return;
+
+        coursesTable.refresh();
+        ArrayList<Course> currMyCourses = faculty.getCourses();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+        for (Course i : currMyCourses)
+            items.add(i);
+
+        coursesTable.setItems(items);
+
+    }
+
+    public void setAllCoursesListener()
+    {
+//        item2.setDisable(true);
+//        item1.setDisable(false);
+
+        coursesTable.setItems(null);
+//        for (int i = 0; i < coursesTable.getItems().size(); i++)
+//            coursesTable.getItems().clear();
+        coursesTable.refresh();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+        for (Course i : Main.allCourses)
+            items.add(i);
+
+        coursesTable.setItems(items);
     }
 
     public void refresh(MouseEvent mouseEvent) throws ParseException
     {
-//        if()
+        if (roomsDetail.isSelected()) viewAllRooms();
+        else if (roomsBooked.isSelected()) bookedRoom();
+        if (myCourses.isSelected()) myCoursesListener();
+        else if (allCourses.isSelected()) setAllCoursesListener();
+        viewTimeTable();
+    }
+
+    public void viewTimeTable() throws ParseException
+    {
+        tableView.getColumns().clear();
+        for (int i = 0; i < tableView.getItems().size(); i++)
+        {
+            tableView.getItems().clear();
+        }
+
+        // Create the data structure
+        ArrayList<ArrayList<String>> data = new ArrayList<>(); //rows, columns
+        ArrayList<Course> courses = faculty.getCourses();
+        int maxCols = 0;
+        for (int d = 0; d < 5; d++)
+        {
+            ArrayList<String> t = new ArrayList<>();
+            t.add(days[d]);
+            Object[][] t2 = new Object[100][2];
+            int i = 0;
+            for (Course c : courses)
+            {
+                if (!c.getTimeslot()[d].equals("-"))
+                {
+                    int x = Integer.parseInt(c.getTimeslot()[d].split("-")[0].split(":")[0]);
+                    x = (x < 8) ? x + 12 : x;
+                    String tempDate = x + ":" + c.getTimeslot()[d].split("-")[0].split(":")[1];
+                    t2[i][0] = (Date) (new SimpleDateFormat("H:mm").parse(tempDate));
+                    t2[i][1] = (String) (c.getName() + "\n" + c.getTimeslot()[d] + "\n" + c.getRoom()[d].toUpperCase());
+                    i++;
+                }
+            }
+            Comparator<Object[]> cc = new Comparator<Object[]>()
+            {
+                @Override
+                public int compare(Object[] o1, Object[] o2)
+                {
+                    return ((Date) (o1[0])).compareTo(((Date) o2[0]));
+                }
+            };
+
+            Arrays.sort(t2, 0, i, cc);
+            for (int j = 0; j < i; j++)
+            {
+                t.add(((String) t2[j][1]));
+            }
+            data.add(t);
+            maxCols = (t.size() > maxCols) ? t.size() : maxCols;
+        }
+        for (int i = 0; i < maxCols; i++)
+        {
+            TableColumn<ArrayList<String>, String> nameColumn = new TableColumn();
+            nameColumn.setText("");
+//            nameColumn.setMaxWidth(116);
+
+            tableView.getColumns().add(nameColumn);
+
+            // Add cell value factories
+            int finalI = i;
+            nameColumn.setCellValueFactory((p) ->
+            {
+                ArrayList<String> x = p.getValue();
+                return new SimpleStringProperty(x != null && x.size() > finalI ? x.get(finalI) : " \n \n \n");
+            });
+        }
+
+        // Add Data
+        tableView.getItems().addAll(data);
     }
 }

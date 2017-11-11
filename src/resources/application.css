@@ -81,11 +81,19 @@
     -fx-background-color: #213752;
 }
 
-.table-view{
+.table-view {
     -fx-background-color: black;
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+    -fx-text-alignment: center;
+    -fx-alignment: center;
 }
 
-.table-view .column-header-background{
+#coursesTable {
+    -fx-table-cell-border-color: transparent;
+}
+
+#tableView .column-header-background {
     -fx-max-height: 0;
     -fx-pref-height: 0;
     -fx-min-height: 0;
@@ -93,23 +101,31 @@
     -fx-text-fill: white;
 }
 
-.table-view .table-cell{
+#coursesList .column-header-background {
+    -fx-background-color: #213752;
+    -fx-text-fill: white;
+}
+
+.table-view .table-cell {
     -fx-text-fill: white;
     -fx-min-height: 78;
-    /*-fx-border-color: white;*/
-    /*-fx-border-width: 100%;*/
+    -fx-text-alignment: center;
+    -fx-alignment: center;
 }
 
 .table-row-cell {
     -fx-background-color: black;
     -fx-border-color: white;
-    /*-fx-border-width: 100%;*/
+    -fx-text-alignment: center;
+    -fx-alignment: center;
 }
 
 .table-row-cell:hover {
     -fx-background-color: #213752;
 }
-
+.table-row-cell:selected{
+    -fx-background-color: #213752;
+}
 .table-row-cell:empty .table-cell {
     -fx-border-width: 0px;
 }

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleGroup?>
@@ -16,7 +17,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.StudentActivity">
+<Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FacultyActivity">
     <ImageView fitHeight="467.0" fitWidth="677.0" pickOnBounds="true">
         <image>
             <Image url="@../resources/bg.png" />
@@ -33,15 +34,20 @@
                 <content>
                     <Pane maxHeight="1.7976931348623157E308" maxWidth="571.0" minHeight="0.0" minWidth="0.0" prefHeight="430.0" prefWidth="570.0">
                         <children>
-                            <ListView fx:id="coursesList" layoutX="14.0" layoutY="7.0" prefHeight="396.0" prefWidth="540.0">
-                                <placeholder>
-                                    <Label text="Nothing found" textFill="white">
-                                        <font>
-                                            <Font size="18.0" />
-                                        </font>
-                                    </Label>
-                                </placeholder>
-                            </ListView>
+                            <RadioButton fx:id="myCourses" layoutX="12.0" layoutY="14.0" mnemonicParsing="false" onAction="#myCoursesListener" text="My Courses" textFill="WHITE">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="course" />
+                                </toggleGroup>
+                            </RadioButton>
+                            <RadioButton fx:id="allCourses" layoutX="109.0" layoutY="14.0" mnemonicParsing="false" onAction="#setAllCoursesListener" text="All Courses" textFill="WHITE" toggleGroup="$course" />
+                            <TableView fx:id="coursesTable" layoutX="12.0" layoutY="38.0" prefHeight="371.0" prefWidth="540.0">
+                                <columns>
+                                    <TableColumn fx:id="name" prefWidth="200.0" text="Name" />
+                                    <TableColumn fx:id="code" prefWidth="75.0" text="Code" />
+                                    <TableColumn fx:id="credits" prefWidth="75.0" text="Credits" />
+                                    <TableColumn fx:id="instructor" prefWidth="175.0" text="Instructor" />
+                                </columns>
+                            </TableView>
                         </children>
                     </Pane>
                 </content>

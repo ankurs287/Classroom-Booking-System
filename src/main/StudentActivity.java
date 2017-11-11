@@ -3,6 +3,8 @@ package main;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -12,10 +14,11 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import main.user.Admin;
 import main.user.Student;
 import main.user.User;
@@ -35,13 +38,12 @@ public class StudentActivity extends Application implements Initializable
     private static Student student;
     private static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-    private MenuItem item1, item2;
     @FXML
     private TextField search;
     @FXML
     private Label tname;
     @FXML
-    private ListView coursesList, roomList;
+    private ListView roomList;
     @FXML
     private ComboBox sTimeInterval, eTimeInterval, day, room;
     @FXML
@@ -50,6 +52,10 @@ public class StudentActivity extends Application implements Initializable
     private RadioButton myCourses, allCourses, roomsDetail, roomsBooked;
     @FXML
     private TableView<ArrayList<String>> tableView;
+    @FXML
+    private TableView<Course> coursesTable;
+    @FXML
+    private TableColumn<Course, String> name, code, credits, instructor;
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -83,53 +89,35 @@ public class StudentActivity extends Application implements Initializable
 
     public void myCoursesListener()
     {
-        item1.setDisable(true);
-        item2.setDisable(false);
-        System.out.println(student.getName());
-        try
-        {
-            coursesList.getItems().clear();
+//        item1.setDisable(true);
+//        item2.setDisable(false);
+        coursesTable.setItems(null);
+        if (student.getCourses().isEmpty()) return;
 
-        } catch (Exception e)
-        {
-        }
+        coursesTable.refresh();
+        ArrayList<Course> currMyCourses = student.getCourses();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+        for (Course i : currMyCourses)
+            items.add(i);
 
-        try
-
-        {
-            if (coursesList.getItems().size() != 0)
-                coursesList.getItems().clear();
-            if (student.getCourses().isEmpty()) return;
-
-        } catch (
-                NullPointerException e)
-
-        {
-        }
-        try
-
-        {
-            ArrayList<Course> currMyCourses = student.getCourses();
-            for (Course i : currMyCourses)
-            {
-                coursesList.getItems().add(i.getName());
-            }
-        } catch (Exception e)
-        {
-            System.out.println("here");
-        }
+        coursesTable.setItems(items);
 
     }
 
     public void setAllCoursesListener()
     {
-        item2.setDisable(true);
-        item1.setDisable(false);
-        coursesList.getItems().clear();
+//        item2.setDisable(true);
+//        item1.setDisable(false);
+
+        coursesTable.setItems(null);
+//        for (int i = 0; i < coursesTable.getItems().size(); i++)
+//            coursesTable.getItems().clear();
+        coursesTable.refresh();
+        ObservableList<Course> items = FXCollections.observableArrayList();
         for (Course i : Main.allCourses)
-        {
-            coursesList.getItems().add(i.getName());
-        }
+            items.add(i);
+
+        coursesTable.setItems(items);
     }
 
     @Override
@@ -137,89 +125,155 @@ public class StudentActivity extends Application implements Initializable
     {
         tname.setText("Welcome, " + student.getName());
 
-        item1 = new MenuItem("Join Course");
-        item1.setOnAction(new EventHandler<ActionEvent>()
+        coursesTable.setRowFactory(new Callback<TableView<Course>, TableRow<Course>>()
         {
-            public void handle(ActionEvent e)
+            @Override
+            public TableRow<Course> call(TableView<Course> tableView)
             {
-                String selectedCourse = coursesList.getSelectionModel().getSelectedItem().toString().trim();
-                try
-                {
-                    for (Course i : student.getCourses())
-                    {
-                        if (i.getName().trim().toString().equals(selectedCourse))
-                        {
-                            System.out.println("You've already joined the course.");
-                            return;
-                        }
-                    }
-                } catch (Exception e1)
-                {
+                final TableRow<Course> row = new TableRow<>();
+                final ContextMenu contextMenu = new ContextMenu();
 
-                }
-                for (Course i : Main.allCourses)
+                final MenuItem joinMenuItem = new MenuItem("Join Course");
+                joinMenuItem.setOnAction(new EventHandler<ActionEvent>()
                 {
-                    if (i.getName().trim().toString().equals(selectedCourse))
+                    @Override
+                    public void handle(ActionEvent event)
                     {
-                        student.addCourse(i);
-                        System.out.println("Course Added.");
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
                         try
                         {
-                            Main.serialize(student, "users/" + student.getName());
-                        } catch (IOException e1)
+                            for (Course i : student.getCourses())
+                            {
+                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                {
+                                    System.out.println("You've already joined the course.");
+                                    return;
+                                }
+                            }
+                        } catch (Exception e1)
                         {
-                            e1.printStackTrace();
-                        }
-                        break;
-                    }
-                }
-            }
-        });
-        item2 = new MenuItem("Leave Course");
-        item2.setOnAction(new EventHandler<ActionEvent>()
-        {
-            public void handle(ActionEvent e)
-            {
-                System.out.println("Leave Course");
 
-                String selectedCourse = coursesList.getSelectionModel().getSelectedItem().toString().trim();
-                try
+                        }
+                        for (Course i : Main.allCourses)
+                        {
+                            if (i.getCode().trim().toString().equals(selectedCourse))
+                            {
+                                student.addCourse(i);
+                                System.out.println("Course Added.");
+                                try
+                                {
+                                    Main.serialize(student, "users/" + student.getName());
+                                } catch (IOException e1)
+                                {
+                                    e1.printStackTrace();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+                joinMenuItem.setStyle("-fx-font-size: 13;");
+
+                final MenuItem removeMenuItem = new MenuItem("Leave Course");
+                removeMenuItem.setOnAction(new EventHandler<ActionEvent>()
                 {
-                    for (Course i : student.getCourses())
+                    @Override
+                    public void handle(ActionEvent event)
                     {
-                        if (i.getName().trim().toString().equals(selectedCourse))
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
+                        try
                         {
-                            student.getCourses().remove(i);
-                            Main.serialize(student, "users/" + student.getName());
-                            myCoursesListener();
-                            System.out.println("Course Successfully Removed");
-                            return;
-                        }
-                    }
-                } catch (Exception e1)
-                {
+                            for (Course i : student.getCourses())
+                            {
+                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                {
+                                    student.getCourses().remove(i);
+                                    Main.serialize(student, "users/" + student.getName());
+                                    if (myCourses.isSelected()) myCoursesListener();
+                                    System.out.println("Course Successfully Removed");
+                                    return;
+                                }
+                            }
+                        } catch (Exception e1)
+                        {
 
+                        }
+                        System.out.println("It's not your Course.");
+                    }
+                });
+                removeMenuItem.setStyle("-fx-font-size: 13;");
+
+
+//                contextMenu.getItems().addAll(joinMenuItem, removeMenuItem);
+
+                if (allCourses.isSelected())
+                {
+                    contextMenu.getItems().addAll(joinMenuItem);
+//                    removeMenuItem.setDisable(true);
+//                    joinMenuItem.setDisable(false);
                 }
-                System.out.println("It's not your Course.");
+                else if (myCourses.isSelected())
+                {
+//                    joinMenuItem.setDisable(true);
+//                    removeMenuItem.setDisable(false);
+                    contextMenu.getItems().addAll(removeMenuItem);
+                }
+                else
+                {
+                    contextMenu.getItems().addAll(joinMenuItem, removeMenuItem);
+                }
+                // Set context menu on row, but use a binding to make it only show for non-empty rows:
+                row.contextMenuProperty().bind(
+                        Bindings.when(row.emptyProperty())
+                                .then((ContextMenu) null)
+                                .otherwise(contextMenu)
+                );
+                return row;
             }
         });
 
-        final ContextMenu contextMenu = new ContextMenu(item1, item2);
-        contextMenu.setMaxSize(50, 50);
-        contextMenu.setId("contextMenu");
+        name.setCellValueFactory(new PropertyValueFactory<Course, String>("name"));
+        code.setCellValueFactory(new PropertyValueFactory<Course, String>("code"));
+        credits.setCellValueFactory(new PropertyValueFactory<Course, String>("credits"));
+        instructor.setCellValueFactory(new PropertyValueFactory<Course, String>("instructor"));
 
-        coursesList.setContextMenu(contextMenu);
-        coursesList.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent me) ->
+        name.setCellFactory(col ->
         {
-            if (me.getButton() == MouseButton.SECONDARY && !coursesList.getSelectionModel().isEmpty())
+            TableCell<Course, String> cell = new TableCell<Course, String>()
             {
-                System.out.println("Mouse Left Pressed");
-                contextMenu.show(coursesList, me.getScreenX(), me.getScreenY());
-            }
-            else
+                @Override
+                public void updateItem(String item, boolean empty)
+                {
+                    super.updateItem(item, empty);
+                    if (item != null)
+                    {
+                        Label text = new Label(item);
+                        text.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14;");
+                        text.setWrapText(true);
+                        this.setGraphic(text);
+                    }
+                }
+            };
+            return cell;
+        });
+        instructor.setCellFactory(col ->
+        {
+            TableCell<Course, String> cell = new TableCell<Course, String>()
             {
-                contextMenu.hide();
-            }
+                @Override
+                public void updateItem(String item, boolean empty)
+                {
+                    super.updateItem(item, empty);
+                    if (item != null)
+                    {
+                        Label text = new Label(item);
+                        text.setStyle("-fx-text-fill: white;");
+                        text.setWrapText(true);
+                        this.setGraphic(text);
+                    }
+                }
+            };
+            return cell;
         });
 
         for (int i = 0; i < 7; i++)
@@ -310,7 +364,12 @@ public class StudentActivity extends Application implements Initializable
 
     public void searchCourse(ActionEvent event)
     {
-        coursesList.getItems().clear();
+        myCourses.setSelected(false);
+        allCourses.setSelected(false);
+        coursesTable.setItems(null);
+        coursesTable.refresh();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+
         String[] tbs = search.getText().trim().toString().toLowerCase().split(" ");
         if (search.getText().trim().toString().isEmpty()) return;
         for (Course i : Main.allCourses)
@@ -320,11 +379,12 @@ public class StudentActivity extends Application implements Initializable
             {
                 if (j.toLowerCase().indexOf(tbss) != -1 || i.getName().toLowerCase().indexOf(tbss) != -1)
                 {
-                    coursesList.getItems().add(i.getName());
+                    items.add(i);
                     break;
                 }
             }
         }
+        coursesTable.setItems(items);
     }
 
     public void bookRoom() throws ParseException, IOException
@@ -592,14 +652,14 @@ public class StudentActivity extends Application implements Initializable
 
     public void searchCoursekey(KeyEvent keyEvent)
     {
-        coursesList.getItems().clear();
+//        coursesList.getItems().clear();
         searchCourse(new ActionEvent());
     }
 
     public void refresh(MouseEvent mouseEvent) throws ParseException
     {
-        if(roomsDetail.isSelected()) viewAllRooms();
-        else if(roomsBooked.isSelected()) bookedRoom();
+        if (roomsDetail.isSelected()) viewAllRooms();
+        else if (roomsBooked.isSelected()) bookedRoom();
         if (myCourses.isSelected()) myCoursesListener();
         else if (allCourses.isSelected()) setAllCoursesListener();
         viewTimeTable();

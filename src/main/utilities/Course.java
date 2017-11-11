@@ -66,7 +66,6 @@ public class Course implements Serializable
                 ", prerequisites=" + prerequisites +
                 ", timeslot=" + Arrays.toString(timeslot) +
                 ", room=" + Arrays.toString(room) +
-                ", postConditions=" + postConditions +
                 ", intendedAudience=" + intendedAudience +
                 ", credits=" + credits +
                 ", courseType='" + courseType + '\'' +
