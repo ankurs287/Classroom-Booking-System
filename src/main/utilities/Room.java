@@ -1,10 +1,11 @@
 package main.utilities;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Room
+public class Room implements Serializable
 {
     String name;
     int Capacity;

@@ -4,12 +4,10 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import main.user.Admin;
@@ -27,44 +25,29 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class Main extends Application implements Serializable, Initializable
+public class Main extends Application implements Serializable
 {
     private static final String FILENAME = (new File("").getAbsolutePath());
-    static ArrayList<Course> allCourses = new ArrayList<>();
+    public static ArrayList<Course> allCourses = new ArrayList<>();
     public static HashSet<Room> allRooms = new HashSet<Room>();
     public static ArrayList<User> allUsers = new ArrayList<>();
     private int otp = -1;
     public static Popup popup = new Popup();
 
     @FXML
-    private GridPane pane;
-
+    private TextField sName, sEmail, sOTP, lName;
     @FXML
-    private TextField sName;
-    @FXML
-    private TextField sEmail;
-    @FXML
-    private PasswordField sPassword;
+    private PasswordField sPassword, lPassword;
     @FXML
     private ComboBox role;
     @FXML
-    private TextField sOTP;
-    @FXML
-    private Button getOTP;
-    @FXML
-    private Button signup;
-
-    @FXML
-    private TextField lName;
-    @FXML
-    private PasswordField lPassword;
+    private Button getOTP, signup;
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -80,24 +63,13 @@ public class Main extends Application implements Serializable, Initializable
 
     public static void main(String[] args) throws IOException, ParseException
     {
-        syncDB(); //sync Database
+        syncDB(); //sync Database (deserialize rooms courses, users)
+//        syncCSV(); // serialize rooms and courses from csv
         launch(args);
     }
 
-    private static void syncDB() throws IOException, ParseException
+    private static void syncCSV() throws IOException, ParseException
     {
-        // Users Record
-        File directory = new File(FILENAME + "/src/database/users/");
-        for (File file : directory.listFiles())
-        {
-            if (file.getName().endsWith(".a"))
-            {
-                User temp = deserialize(file.getName());
-                allUsers.add(temp);
-            }
-        }
-        System.out.println(allUsers);
-
         // All Courses & All Rooms
         BufferedReader br = new BufferedReader(new FileReader(FILENAME + "/src/database/timetable/finalap.csv"));
         String line = null;
@@ -177,21 +149,87 @@ public class Main extends Application implements Serializable, Initializable
             }
         }
         System.out.println(allCourses.toString());
+        for (Course c : allCourses)
+        {
+            serialize(c, "courses/" + c.getCode());
+        }
+        for (Room r : allRooms)
+        {
+            serialize(r, "rooms/" + r.getName());
+        }
+
     }
 
-    private static User deserialize(String name) throws IOException
+    private static void syncDB() throws IOException, ParseException
     {
-        ObjectInputStream in = null;
-        User temp = null;
+        // Users Record
+        File directory = new File(FILENAME + "/src/database/users/");
+        for (File file : directory.listFiles())
+        {
+            if (file.getName().endsWith(".a"))
+            {
+                User temp = (User) deserialize(file.getName(), "users");
+                allUsers.add(temp);
+            }
+        }
+        System.out.println(allUsers);
+
+        new Admin();
+        Admin.requests = (HashMap) deserialize("request.a", "requests");
+        System.out.println(Admin.requests);
+
+//        All Courses
+        directory = new File(FILENAME + "/src/database/courses/");
+        for (File file : directory.listFiles())
+        {
+            if (file.getName().endsWith(".a"))
+            {
+                Course temp = (Course) deserialize(file.getName(), "courses");
+                allCourses.add(temp);
+            }
+        }
+        System.out.println(allCourses);
+
+//        All Rooms
+        directory = new File(FILENAME + "/src/database/rooms/");
+        for (File file : directory.listFiles())
+        {
+            if (file.getName().endsWith(".a"))
+            {
+                Room temp = (Room) deserialize(file.getName(), "rooms");
+                allRooms.add(temp);
+            }
+        }
+        System.out.println(allRooms);
+    }
+
+    public static void serialize(Object o, String path) throws IOException
+    {
+        ObjectOutputStream out = null;
         try
         {
-            in = new ObjectInputStream(new FileInputStream(FILENAME + "/src/database/users/" + name));
-            temp = (User) in.readObject();
+            out = new ObjectOutputStream(new FileOutputStream(FILENAME + "/src/database/" + path + ".a"));
+            out.writeObject(o);
         } catch (Exception e)
         {
             e.printStackTrace();
         }
-        in.close();
+        out.close();
+    }
+
+    public static Object deserialize(String name, String type) throws IOException
+    {
+        ObjectInputStream in = null;
+        Object temp = null;
+        try
+        {
+            in = new ObjectInputStream(new FileInputStream(FILENAME + "/src/database/" + type + "/" + name));
+            temp = (Object) in.readObject();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        if (in != null) in.close();
         return temp;
     }
 
@@ -294,7 +332,7 @@ public class Main extends Application implements Serializable, Initializable
         {
             user = new Student(sName.getText().trim().toString(), sEmail.getText().trim().toString().toLowerCase(), "Student", sPassword.getText().toString(), new ArrayList<Course>(), new Timetable());
         }
-        serialize(user);
+        serialize(user, "users/" + user.getEmail());
         allUsers.add(user);
 
         new Signup().start(new Stage());
@@ -316,20 +354,6 @@ public class Main extends Application implements Serializable, Initializable
         if (trim.endsWith("@iiitd.ac.in"))
             return true;
         return true;
-    }
-
-    public static void serialize(User user) throws IOException
-    {
-        ObjectOutputStream out = null;
-        try
-        {
-            out = new ObjectOutputStream(new FileOutputStream(FILENAME + "/src/database/users/" + user.getEmail() + ".a"));
-            out.writeObject(user);
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        out.close();
     }
 
     public void gotoUser(ActionEvent event) throws Exception
@@ -385,12 +409,6 @@ public class Main extends Application implements Serializable, Initializable
         new ForgotPasswordActivity().start(new Stage());
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources)
-    {
-//        updateRoomValidity();
-    }
-
     public static void callPop(String text)
     {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -398,35 +416,6 @@ public class Main extends Application implements Serializable, Initializable
         alert.setHeaderText(null);
         alert.setContentText(text);
         alert.showAndWait();
-//        final Popup popup = new Popup();
-//        Pane pp = new Pane();
-//        pp.setMinWidth(300);
-//        pp.setMinHeight(100);
-//        pp.setStyle("-fx-background-color: #213752; -fx-border-color: black; -fx-border-width: 300%");
-//        Label l = new Label("Select Room");
-//        l.setTextAlignment(TextAlignment.CENTER);
-//        l.setAlignment(Pos.TOP_CENTER);
-//        l.setLayoutY(16);
-//        l.setStyle("-fx-font-size: 18");
-//        l.setPrefHeight(61);
-//        l.setPrefWidth(300);
-//        l.setTextFill(Paint.valueOf("#ffffff"));
-//        Button b = new Button("OK");
-//        b.setLayoutX(134);
-//        b.setLayoutY(67);
-//        b.setOnAction(new EventHandler<ActionEvent>()
-//        {
-//            @Override
-//            public void handle(ActionEvent event)
-//            {
-//                popup.hide();
-//            }
-//        });
-//        pp.getChildren().addAll(l, b);
-//        popup.getContent().add(pp);
-//        popup.setX(ps.getX() + 150);
-//        popup.setY(ps.getY() + 160);
-//        popup.show(ps);
     }
 
     public static void updateRoomValidity()
@@ -449,8 +438,8 @@ public class Main extends Application implements Serializable, Initializable
             {
                 for (ArrayList<Object> j : i.getBookedRoom().get(s))
                 {
-                    Date dd= (Date)j.get(0);
-                    if(dd.compareTo(java.sql.Date.valueOf(localDate)) >= 0)
+                    Date dd = (Date) j.get(0);
+                    if (dd.compareTo(java.sql.Date.valueOf(localDate)) >= 0)
                     {
                         i.getBookedRoom().get(s).remove(j);
                     }

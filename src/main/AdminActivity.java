@@ -10,6 +10,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import main.user.Admin;
@@ -32,23 +33,16 @@ public class AdminActivity extends Application implements Initializable
     private static Admin admin;
     private static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-
     @FXML
     private Label tname;
     @FXML
-    private ListView roomList2;
-    @FXML
     private ListView roomList;
     @FXML
-    private ComboBox day;
-    @FXML
-    private ComboBox room;
-    @FXML
-    private ComboBox sTimeInterval;
-    @FXML
-    private ComboBox eTimeInterval;
+    private ComboBox day, room, sTimeInterval, eTimeInterval;
     @FXML
     private TextArea reason;
+    @FXML
+    private RadioButton roomsDetail, requestsBtn, roomsBooked;
 
 
     @Override
@@ -56,7 +50,7 @@ public class AdminActivity extends Application implements Initializable
     {
         Parent root = FXMLLoader.load(getClass().getResource("adminactivity.fxml"));
         primaryStage.setTitle("My Classroom- Admin");
-        Scene scene = new Scene(root, 500, 400);
+        Scene scene = new Scene(root, 660, 450);
         scene.getStylesheets().add(getClass().getResource("../resources/application.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
@@ -119,10 +113,10 @@ public class AdminActivity extends Application implements Initializable
 
     public void bookedRoom()
     {
-        roomList2.getItems().clear();
+        roomList.getItems().clear();
         if (admin.getBookedRoom() == null)
         {
-            roomList2.getItems().add("No Room is Booked.");
+            roomList.getItems().add("No Room is Booked.");
             Main.callPop("No Room is Booked.");
         }
         else
@@ -135,9 +129,9 @@ public class AdminActivity extends Application implements Initializable
                     Label la1 = new Label(k.toUpperCase());
                     la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
 
-                    roomList2.getItems().add(la1);
-                    roomList2.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
-                    roomList2.getItems().add("Reason: " + i.get(2));
+                    roomList.getItems().add(la1);
+                    roomList.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
+                    roomList.getItems().add("Reason: " + i.get(2));
                     Button cancel = new Button("Cancel Booking");
                     cancel.setOnAction(new EventHandler<ActionEvent>()
                     {
@@ -156,33 +150,43 @@ public class AdminActivity extends Application implements Initializable
                                             try
                                             {
                                                 da.remove(dd);
+                                                Main.serialize(r, "rooms/" + r.getName());
                                             } catch (Exception e)
                                             {
                                             }
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
-                                admin.getBookedRoom().get(k).remove(i);
-                                roomList2.getItems().clear();
-                                bookedRoom();
-                                roomList.getItems().clear();
-                                try
-                                {
-                                    viewAllRooms();
-                                } catch (ParseException e)
-                                {
-                                    e.printStackTrace();
-                                }
                             }
+                            admin.getBookedRoom().get(k).remove(i);
+                            // serialize room and admin
+                            try
+                            {
+                                Main.serialize(admin, "users/" + admin.getEmail());
+                            } catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
+
+                            roomList.getItems().clear();
+                            bookedRoom();
+                            try
+                            {
+                                viewAllRooms();
+                            } catch (ParseException e)
+                            {
+                                e.printStackTrace();
+                            }
+
                         }
                     });
-                    roomList2.getItems().add(cancel);
+                    roomList.getItems().add(cancel);
                 }
             }
         }
-    }
 
+    }
 
     public void viewAllRooms() throws ParseException
     {
@@ -201,7 +205,14 @@ public class AdminActivity extends Application implements Initializable
                 LocalDate localDate = LocalDate.now().plusDays(d);
                 String temp = dtf.format(localDate) + " " + localDate.getDayOfWeek() + ": ";
 
-                ArrayList<Date[]> ti = status.get(d);
+                ArrayList<Date[]> ti = new ArrayList<>();
+                for (int j = 0; j < 6; j++)
+                {
+                    if (days[j].toUpperCase().equals(localDate.getDayOfWeek().toString().toUpperCase()))
+                    {
+                        ti = status.get(j);
+                    }
+                }
                 for (int a = 0; a < ti.size(); a++)
                 {
 
@@ -323,9 +334,8 @@ public class AdminActivity extends Application implements Initializable
             if (avail)
             {
                 System.out.println("Room Available");
-//                sendRequest(r, Day, s, e);
+                // with current date and time added
                 r.getBooked().add(new Date[]{format.parse(Day.split(" ")[0] + " " + s), format.parse(Day.split(" ")[0] + " " + e)});
-//                if(1==1) return;
 
                 HashMap<String, ArrayList<ArrayList<Object>>> br = admin.getBookedRoom();
                 if (br.containsKey(r.getName()))
@@ -334,7 +344,7 @@ public class AdminActivity extends Application implements Initializable
                     ar.add(format.parse(Day.split(" ")[0] + " " + s));
                     ar.add(format.parse(Day.split(" ")[0] + " " + e));
                     ar.add(reason.getText().toString().trim());
-                    ar.add((boolean) false);
+                    ar.add((boolean) true);
                     br.get(r.getName()).add(ar);
                     System.out.println(br.toString());
                 }
@@ -344,29 +354,30 @@ public class AdminActivity extends Application implements Initializable
                     ar.add(format.parse(Day.split(" ")[0] + " " + s));
                     ar.add(format.parse(Day.split(" ")[0] + " " + e));
                     ar.add(reason.getText().toString().trim());
-                    ar.add((boolean) false);
+                    ar.add((boolean) true);
                     ArrayList<ArrayList<Object>> arr = new ArrayList<>();
                     arr.add(ar);
                     br.put(r.getName(), arr);
                     System.out.println(br.toString());
                 }
+
+                // Room Booked and serialize room and admin object
+                Main.serialize(r, "rooms/" + r.getName());
+                Main.serialize(admin, "users/" + admin.getEmail());
                 viewAllRooms();
+                // refresh function call
             }
             else
             {
                 System.out.println("Room Not Available");
                 Main.callPop("Room Not Available");
             }
-            for (int i = 0; i < r.getBooked().size(); i++)
-            {
-//                System.out.println(format.format(r.getBooked().get(i)[0]) + " " + format.format(r.getBooked().get(i)[1]));
-            }
         }
     }
 
-    public void viewRequests()
+    public void viewRequests() throws IOException
     {
-        roomList2.getItems().clear();
+        roomList.getItems().clear();
         for (String k : Admin.requests.keySet())
         {
             for (ArrayList<Object> i : Admin.requests.get(k))
@@ -375,10 +386,10 @@ public class AdminActivity extends Application implements Initializable
                 Label la1 = new Label(k.toUpperCase());
                 la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
 
-                roomList2.getItems().add(la1);
-                roomList2.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(1)) + ": " + format.format(i.get(1)) + " - " + format.format(i.get(2)));
-                roomList2.getItems().add("Reason: " + i.get(3));
-                roomList2.getItems().add("Requested by:- " + ((User) i.get(0)).getName() + " " + ((User) i.get(0)).getEmail());
+                roomList.getItems().add(la1);
+                roomList.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(1)) + ": " + format.format(i.get(1)) + " - " + format.format(i.get(2)));
+                roomList.getItems().add("Reason: " + i.get(3));
+                roomList.getItems().add("Requested by:- " + ((User) i.get(0)).getName() + " " + ((User) i.get(0)).getEmail());
 
                 HBox hbox = new HBox();
                 Button accept = new Button("Accept");
@@ -390,32 +401,52 @@ public class AdminActivity extends Application implements Initializable
                     public void handle(ActionEvent event)
                     {
                         HashMap<String, ArrayList<ArrayList<Object>>> br = ((User) i.get(0)).getBookedRoom();
-                        if (br.containsKey(k))
+                        for (ArrayList<Object> ar : br.get(k))
                         {
-                            ArrayList<Object> ar = new ArrayList<Object>();
-                            ar.add(((Date) i.get(1)));
-                            ar.add(((Date) i.get(2)));
-                            ar.add(((String) i.get(3)));
-                            ar.add(((boolean) true));
-                            br.get(k).add(ar);
-                            System.out.println(br.toString());
-                        }
-                        else
-                        {
-                            ArrayList<Object> ar = new ArrayList<Object>();
-                            ar.add(((Date) i.get(1)));
-                            ar.add(((Date) i.get(2)));
-                            ar.add(((String) i.get(3)));
-                            ar.add(((boolean) true));
-
-                            ArrayList<ArrayList<Object>> arr = new ArrayList<>();
-                            arr.add(ar);
-                            br.put(k, arr);
-                            System.out.println(br.toString());
+                            if (ar.get(0).equals(i.get(1)) && ar.get(1).equals(i.get(2)) && ar.get(2).equals(i.get(3)))
+                            {
+                                ar.set(3, true);
+                                break;
+                            }
                         }
                         Admin.requests.get(k).remove(i);
-                        roomList2.getItems().clear();
-                        viewRequests();
+                        // serialize room, admin, student
+                        for (Room r : Main.allRooms)
+                        {
+                            if (r.getName().equals(k))
+                            {
+                                try
+                                {
+                                    Main.serialize(r, "rooms/" + r.getName());
+                                    break;
+                                } catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        try
+                        {
+                            Main.serialize(((User) i.get(0)), "users/" + ((User) i.get(0)).getEmail());
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        try
+                        {
+                            Main.serialize(Admin.requests, "requests/request");
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        roomList.getItems().clear();
+                        try
+                        {
+                            viewRequests();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 reject.setOnAction(new EventHandler<ActionEvent>()
@@ -439,15 +470,57 @@ public class AdminActivity extends Application implements Initializable
                             }
                         }
                         Admin.requests.get(k).remove(i);
-                        roomList2.getItems().clear();
-                        viewRequests();
+                        HashMap<String, ArrayList<ArrayList<Object>>> br = ((User) i.get(0)).getBookedRoom();
+                        for (ArrayList<Object> ar : br.get(k))
+                        {
+                            if (ar.get(0).equals(i.get(1)) && ar.get(1).equals(i.get(2)) && ar.get(2).equals(i.get(3)))
+                            {
+                                br.get(k).remove(ar);
+                                break;
+                            }
+                        }
+                        // serialize room, admin, student
+                        for (Room r : Main.allRooms)
+                        {
+                            if (r.getName().equals(k))
+                            {
+                                try
+                                {
+                                    Main.serialize(r, "rooms/" + r.getName());
+                                    break;
+                                } catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        try
+                        {
+                            Main.serialize(((User) i.get(0)), "users/" + ((User) i.get(0)).getEmail());
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        try
+                        {
+                            Main.serialize(Admin.requests, "requests/request");
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        roomList.getItems().clear();
+                        try
+                        {
+                            viewRequests();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 hbox.getChildren().addAll(accept, sp, reject);
-                roomList2.getItems().add(hbox);
-                roomList2.getItems().add("");
-
-
+                roomList.getItems().add(hbox);
+                roomList.getItems().add("");
             }
         }
     }
@@ -464,5 +537,12 @@ public class AdminActivity extends Application implements Initializable
         long curTimeInMs = date1.getTime();
         date2 = new Date(curTimeInMs + ((initial) * 60000 * 30));
         return new SimpleDateFormat("H:mm").format(date2);
+    }
+
+    public void refresh(MouseEvent mouseEvent) throws ParseException, IOException
+    {
+        if(requestsBtn.isSelected()) viewRequests();
+        else if(roomsBooked.isSelected()) bookedRoom();
+        else if(roomsDetail.isSelected()) viewAllRooms();
     }
 }

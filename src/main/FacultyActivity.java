@@ -13,6 +13,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import main.user.Faculty;
+import main.user.User;
+import main.utilities.Course;
 import main.utilities.Room;
 
 import java.io.IOException;
@@ -34,32 +36,18 @@ public class FacultyActivity extends Application implements Initializable
     @FXML
     private Label tname;
     @FXML
-    private ListView coursesList;
-    
-
+    private ListView coursesList, roomList;
     @FXML
-    private ListView roomList;
-    @FXML
-    private ComboBox sTimeInterval;
-    @FXML
-    private ComboBox eTimeInterval;
-    @FXML
-    private Button btnbook;
-    @FXML
-    private ComboBox day;
-    @FXML
-    private ListView roomList2;
-    @FXML
-    private ComboBox room;
+    private ComboBox sTimeInterval, eTimeInterval, day, room;
     @FXML
     private TextArea reason;
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("facultyactivity.fxml"));
         primaryStage.setTitle("My Classroom- Faculty");
-        Scene scene=new Scene(root,500,400);
+        Scene scene = new Scene(root, 660, 450);
         scene.getStylesheets().add(getClass().getResource("../resources/application.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
@@ -219,9 +207,7 @@ public class FacultyActivity extends Application implements Initializable
             if (avail)
             {
                 System.out.println("Room Available");
-//                sendRequest(r, Day, s, e);
                 r.getBooked().add(new Date[]{format.parse(Day.split(" ")[0] + " " + s), format.parse(Day.split(" ")[0] + " " + e)});
-//                if(1==1) return;
 
                 HashMap<String, ArrayList<ArrayList<Object>>> br = faculty.getBookedRoom();
                 if (br.containsKey(r.getName()))
@@ -246,22 +232,18 @@ public class FacultyActivity extends Application implements Initializable
                     br.put(r.getName(), arr);
                     System.out.println(br.toString());
                 }
+                // Room Booked and serialize room and admin object
+                Main.serialize(r, "rooms/" + r.getName());
+                Main.serialize(faculty, "users/" + faculty.getEmail());
                 viewAllRooms();
+                // refresh function call
             }
             else
             {
                 System.out.println("Room Not Available");
                 Main.callPop("Room Not Available");
             }
-            for (int i = 0; i < r.getBooked().size(); i++)
-            {
-//                System.out.println(format.format(r.getBooked().get(i)[0]) + " " + format.format(r.getBooked().get(i)[1]));
-            }
         }
-    }
-
-    public void refresh(MouseEvent mouseEvent)
-    {
     }
 
     public void viewAllRooms() throws ParseException
@@ -281,7 +263,14 @@ public class FacultyActivity extends Application implements Initializable
                 LocalDate localDate = LocalDate.now().plusDays(d);
                 String temp = dtf.format(localDate) + " " + localDate.getDayOfWeek() + ": ";
 
-                ArrayList<Date[]> ti = status.get(d);
+                ArrayList<Date[]> ti = new ArrayList<>();
+                for (int j = 0; j < 6; j++)
+                {
+                    if (days[j].toUpperCase().equals(localDate.getDayOfWeek().toString().toUpperCase()))
+                    {
+                        ti = status.get(j);
+                    }
+                }
                 for (int a = 0; a < ti.size(); a++)
                 {
 
@@ -306,10 +295,10 @@ public class FacultyActivity extends Application implements Initializable
 
     public void bookedRoom()
     {
-        roomList2.getItems().clear();
+        roomList.getItems().clear();
         if (faculty.getBookedRoom() == null)
         {
-            roomList2.getItems().add("No Room is Booked.");
+            roomList.getItems().add("No Room is Booked.");
             Main.callPop("No Room is Booked.");
         }
         else
@@ -322,9 +311,9 @@ public class FacultyActivity extends Application implements Initializable
                     Label la1 = new Label(k.toUpperCase());
                     la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
 
-                    roomList2.getItems().add(la1);
-                    roomList2.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
-                    roomList2.getItems().add("Reason: " + i.get(2));
+                    roomList.getItems().add(la1);
+                    roomList.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
+                    roomList.getItems().add("Reason: " + i.get(2));
                     Button cancel = new Button("Cancel Booking");
                     cancel.setOnAction(new EventHandler<ActionEvent>()
                     {
@@ -343,6 +332,7 @@ public class FacultyActivity extends Application implements Initializable
                                             try
                                             {
                                                 da.remove(dd);
+                                                Main.serialize(r, "rooms/" + r.getName());
                                             } catch (Exception e)
                                             {
                                             }
@@ -351,9 +341,16 @@ public class FacultyActivity extends Application implements Initializable
                                     }
                                 }
                                 faculty.getBookedRoom().get(k).remove(i);
-                                roomList2.getItems().clear();
-                                bookedRoom();
+                                // serialize room and admin
+                                try
+                                {
+                                    Main.serialize(faculty, "users/" + faculty.getEmail());
+                                } catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
                                 roomList.getItems().clear();
+                                bookedRoom();
                                 try
                                 {
                                     viewAllRooms();
@@ -364,7 +361,7 @@ public class FacultyActivity extends Application implements Initializable
                             }
                         }
                     });
-                    roomList2.getItems().add(cancel);
+                    roomList.getItems().add(cancel);
                 }
             }
         }
@@ -382,5 +379,21 @@ public class FacultyActivity extends Application implements Initializable
         long curTimeInMs = date1.getTime();
         date2 = new Date(curTimeInMs + ((initial) * 60000 * 30));
         return new SimpleDateFormat("H:mm").format(date2);
+    }
+
+    private void myCourses()
+    {
+        for (Course c: Main.allCourses)
+        {
+            if(c.getInstructor().toLowerCase().equals(faculty.getName()))
+            {
+                coursesList.getItems().add(c.getName());
+            }
+        }
+    }
+
+    public void refresh(MouseEvent mouseEvent) throws ParseException
+    {
+//        if()
     }
 }

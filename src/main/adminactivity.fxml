@@ -8,7 +8,6 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -16,13 +15,13 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="424.0" prefWidth="519.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.AdminActivity">
-    <ImageView fitHeight="427.0" fitWidth="520" pickOnBounds="true">
+<Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.AdminActivity">
+    <ImageView fitHeight="467.0" fitWidth="677.0" pickOnBounds="true">
         <image>
             <Image url="@../resources/bg.png" />
         </image>
     </ImageView>
-    <TabPane layoutY="39.0" prefHeight="392.0" prefWidth="520.0" rotateGraphic="true" side="LEFT" stylesheets="@../resources/application.css" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0" tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <TabPane layoutY="39.0" prefHeight="430.0" prefWidth="670.0" rotateGraphic="true" side="LEFT" stylesheets="@../resources/application.css" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0" tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
         <tabs>
             <Tab>
                 <graphic>
@@ -31,10 +30,10 @@
                     </StackPane>
                 </graphic>
                 <content>
-                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
+                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="570.0">
                         <children>
-                            <Button fx:id="btnbook" layoutX="291.0" layoutY="273.0" mnemonicParsing="false" onAction="#bookRoom" prefHeight="25.0" prefWidth="95.0" text="Book" wrapText="true" />
-                            <ListView fx:id="roomList" layoutX="14.0" layoutY="25.0" prefHeight="196.0" prefWidth="372.0">
+                            <Button fx:id="btnbook" layoutX="398.0" layoutY="379.0" mnemonicParsing="false" onAction="#bookRoom" prefHeight="25.0" prefWidth="157.0" text="Book" wrapText="true" />
+                            <ListView fx:id="roomList" layoutX="14.0" layoutY="33.0" prefHeight="371.0" prefWidth="372.0">
                                 <placeholder>
                                     <Label text="Nothing found" textFill="white">
                                         <font>
@@ -43,72 +42,34 @@
                                     </Label>
                                 </placeholder>
                             </ListView>
-                            <ComboBox fx:id="day" layoutX="168.0" layoutY="237.0" prefHeight="25.0" prefWidth="218.0" promptText="Date" />
-                            <ComboBox fx:id="sTimeInterval" layoutX="14.0" layoutY="273.0" prefHeight="25.0" prefWidth="116.0" promptText="Start Time" />
-                            <ComboBox fx:id="eTimeInterval" layoutX="142.0" layoutY="273.0" prefHeight="25.0" prefWidth="116.0" promptText="End Time" />
-                            <TextArea fx:id="reason" layoutX="14.0" layoutY="308.0" prefHeight="49.0" prefWidth="372.0" promptText="Reason" />
-                            <ComboBox fx:id="room" layoutX="14.0" layoutY="237.0" prefHeight="25.0" prefWidth="136.0" promptText="Room" />
-                            <Label alignment="TOP_LEFT" layoutX="14.0" layoutY="5.0" prefHeight="17.0" prefWidth="371.0" text="Booked Rooms" textFill="WHITE" textOverrun="CLIP" />
-                        </children>
-                    </Pane>
-                </content>
-            </Tab>
-            <Tab>
-                <graphic>
-                    <StackPane rotate="90.0">
-                        <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0" text="View Booked Room/ Cancel Booked Room" textFill="WHITE" wrapText="true" />
-                    </StackPane>
-                </graphic>
-                <content>
-                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
-                        <children>
-                            <ListView fx:id="roomList2" layoutX="17.0" layoutY="39.0" prefHeight="330.0" prefWidth="380.0">
-                                <placeholder>
-                                    <Label text="Nothing found" textFill="white">
-                                        <font>
-                                            <Font size="18.0" />
-                                        </font>
-                                    </Label>
-                                </placeholder>
-                            </ListView>
-                     <RadioButton layoutX="17.0" layoutY="14.0" mnemonicParsing="false" onAction="#bookedRoom" text="View Booked Rooms" textFill="WHITE" wrapText="true">
-                        <toggleGroup>
-                           <ToggleGroup fx:id="r2" />
-                        </toggleGroup></RadioButton>
-                     <RadioButton layoutX="165.0" layoutY="14.0" mnemonicParsing="false" onAction="#viewRequests" text="View Requests" textFill="WHITE" toggleGroup="$r2" wrapText="true" />
-                        </children>
-                    </Pane>
-                </content>
-            </Tab>
-            <Tab>
-                <graphic>
-                    <StackPane rotate="90.0">
-                        <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0" text="My Profile" textFill="WHITE" wrapText="true" />
-                    </StackPane>
-                </graphic>
-                <content>
-                    <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="500.0">
-                        <children>
-                            <TextField layoutX="186.0" layoutY="193.0" prefHeight="25.0" prefWidth="189.0" />
-                            <TextField layoutX="186.0" layoutY="233.0" prefHeight="25.0" prefWidth="189.0" />
-                            <TextField layoutX="186.0" layoutY="276.0" prefHeight="25.0" prefWidth="189.0" />
-                            <Label layoutX="19.0" layoutY="191.0" prefHeight="29.0" prefWidth="55.0" text="Name" textFill="WHITE" />
-                            <Label layoutX="19.0" layoutY="231.0" prefHeight="29.0" prefWidth="142.0" text="Email" textFill="WHITE" />
-                            <Label layoutX="19.0" layoutY="274.0" prefHeight="29.0" prefWidth="142.0" text="New Password" textFill="WHITE" />
-                            <Button layoutX="265.0" layoutY="313.0" mnemonicParsing="false" text="Change Password" wrapText="true" />
-                            <ImageView fitHeight="108.0" fitWidth="116.0" layoutX="19.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
-                            </ImageView>
-                        </children>
-                    </Pane>
-                </content>
-            </Tab>
+                            <ComboBox fx:id="day" layoutX="398.0" layoutY="33.0" prefHeight="25.0" prefWidth="157.0" promptText="Date" />
+                            <ComboBox fx:id="sTimeInterval" layoutX="398.0" layoutY="113.0" prefHeight="25.0" prefWidth="157.0" promptText="Start Time" />
+                            <ComboBox fx:id="eTimeInterval" layoutX="398.0" layoutY="153.0" prefHeight="25.0" prefWidth="157.0" promptText="End Time" />
+                            <TextArea fx:id="reason" layoutX="398.0" layoutY="193.0" prefHeight="169.0" prefWidth="157.0" promptText="Reason" />
+                            <ComboBox fx:id="room" layoutX="398.0" layoutY="73.0" prefHeight="25.0" prefWidth="157.0" promptText="Room" />
+                            <RadioButton fx:id="roomsDetail" layoutX="14.0" layoutY="6.0" mnemonicParsing="false" onAction="#viewAllRooms" text="Rooms Detail" textFill="WHITE">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="rr" />
+                                </toggleGroup>
+                            </RadioButton>
+                            <RadioButton fx:id="roomsBooked" layoutX="130.0" layoutY="5.0" mnemonicParsing="false" onAction="#bookedRoom" text="Rooms Booked by you" textFill="WHITE" toggleGroup="$rr" />
+                            <RadioButton fx:id="requestsBtn" layoutX="288.0" layoutY="6.0" mnemonicParsing="false" onAction="#viewRequests" text="View Requests" textFill="WHITE" toggleGroup="$rr" wrapText="true" />
 
+                        </children>
+                    </Pane>
+                </content>
+            </Tab>
         </tabs>
     </TabPane>
-    <Button fx:id="logout" layoutX="404.0" layoutY="-2.0" mnemonicParsing="false" onAction="#gotoHome" prefHeight="32.0" prefWidth="116.0" text="Log out" />
-    <Label fx:id="tname" layoutX="8.0" prefHeight="40.0" prefWidth="380.0" text="Welcome" textFill="WHITE">
+    <Button fx:id="logout" layoutX="561.0" mnemonicParsing="false" onAction="#gotoHome" prefHeight="32.0" prefWidth="116.0" text="Log out" />
+    <Label fx:id="tname" layoutX="8.0" prefHeight="40.0" prefWidth="454.0" text="Welcome" textFill="WHITE">
         <font>
             <Font size="14.0" />
         </font>
     </Label>
+    <ImageView fitHeight="25.0" fitWidth="28.0" layoutX="527.0" layoutY="4.0" onMouseClicked="#refresh" pickOnBounds="true">
+        <image>
+            <Image url="@../resources/refresh.png" />
+        </image>
+    </ImageView>
 </Pane>

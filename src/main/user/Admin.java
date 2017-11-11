@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Admin extends User
 {
-    public static HashMap<String, ArrayList<ArrayList<Object>>> requests = new HashMap<>(); // roomname: "user start end reason", "user start end reason"
+    public static HashMap<String, ArrayList<ArrayList<Object>>> requests=new HashMap<>(); // roomname: "user start end reason", "user start end reason"
 
     public Admin(String name, String email, String type, String password)
     {

@@ -80,3 +80,36 @@
 .combo-box-popup .list-view .list-cell:hover {
     -fx-background-color: #213752;
 }
+
+.table-view{
+    -fx-background-color: black;
+}
+
+.table-view .column-header-background{
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: white;
+    -fx-min-height: 78;
+    /*-fx-border-color: white;*/
+    /*-fx-border-width: 100%;*/
+}
+
+.table-row-cell {
+    -fx-background-color: black;
+    -fx-border-color: white;
+    /*-fx-border-width: 100%;*/
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #213752;
+}
+
+.table-row-cell:empty .table-cell {
+    -fx-border-width: 0px;
+}
