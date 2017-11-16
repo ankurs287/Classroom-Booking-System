@@ -1,5 +1,6 @@
 package main;
 
+import com.jfoenix.controls.*;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,19 +11,23 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import main.user.Faculty;
-import main.user.User;
 import main.utilities.Course;
 import main.utilities.Room;
 
+import javax.swing.text.html.ImageView;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -31,19 +36,31 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static main.Main.getUpdate;
+import static main.Main.setUpdate;
+
+/*FacultyController on Faculty Login*/
 public class FacultyActivity extends Application implements Initializable
 {
     private static Faculty faculty;
     private static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
     @FXML
+    private JFXTextField search;
+    @FXML
     private Label tname;
     @FXML
-    private ListView coursesList, roomList;
+    private JFXListView roomList;
     @FXML
-    private ComboBox sTimeInterval, eTimeInterval, day, room;
+    private JFXTimePicker sTimeInterval, eTimeInterval;
     @FXML
-    private TextArea reason;
+    private JFXDatePicker day;
+    @FXML
+    private JFXComboBox room;
+    @FXML
+    private JFXTextArea reason;
+    @FXML
+    private JFXRadioButton myCourses, allCourses, roomsDetail, roomsBooked;
     @FXML
     private TableView<ArrayList<String>> tableView;
     @FXML
@@ -51,7 +68,7 @@ public class FacultyActivity extends Application implements Initializable
     @FXML
     private TableColumn<Course, String> name, code, credits, instructor;
     @FXML
-    private RadioButton myCourses, allCourses, roomsDetail, roomsBooked;
+    private ImageView anim;
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -65,12 +82,14 @@ public class FacultyActivity extends Application implements Initializable
         primaryStage.show();
     }
 
+    //call start and declare current user
     public void go(Stage stage, Faculty faculty) throws Exception
     {
         this.faculty = faculty;
         start(stage);
     }
 
+    // go to login/signup page
     public void gotoHome(ActionEvent event)
     {
         try
@@ -83,10 +102,95 @@ public class FacultyActivity extends Application implements Initializable
         }
     }
 
+    // display courses taught by faculty
+    public void myCoursesListener() throws IOException, ParseException
+    {
+        // get update from database
+        faculty = (Faculty) getUpdate(faculty);
+
+        coursesTable.setItems(null);
+        if (faculty.getCourses().isEmpty()) return;
+
+        coursesTable.refresh();
+        ArrayList<Course> currMyCourses = faculty.getCourses();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+        for (Course i : currMyCourses)
+            items.add(i);
+
+        coursesTable.setItems(items);
+    }
+
+    // display all courses in institute
+    public void setAllCoursesListener() throws IOException, ParseException
+    {
+        // get update from database
+        faculty = (Faculty) getUpdate(faculty);
+
+        coursesTable.setItems(null);
+        coursesTable.refresh();
+        ObservableList<Course> items = FXCollections.observableArrayList();
+        for (Course i : Main.allCourses)
+            items.add(i);
+
+        coursesTable.setItems(items);
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
         tname.setText("Welcome, " + faculty.getName());
+
+        myCourses.setSelected(true);
+        allCourses.setSelected(false);
+        roomsDetail.setSelected(true);
+        roomsBooked.setSelected(false);
+        sTimeInterval.setEditable(false);
+        eTimeInterval.setEditable(false);
+
+        try
+        {
+            refresh();
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        day.setConverter(new StringConverter<LocalDate>()
+        {
+            String pattern = "dd/MM/yyyy";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
+            @Override
+            public String toString(LocalDate date)
+            {
+                if (date != null)
+                {
+                    return dateFormatter.format(date);
+                }
+                else
+                {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string)
+            {
+                if (string != null && !string.isEmpty())
+                {
+                    return LocalDate.parse(string, dateFormatter);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        });
+        day.setPromptText("Date");
+
         coursesTable.setRowFactory(new Callback<TableView<Course>, TableRow<Course>>()
         {
             @Override
@@ -101,12 +205,19 @@ public class FacultyActivity extends Application implements Initializable
                     @Override
                     public void handle(ActionEvent event)
                     {
-                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
+                        try
+                        {
+                            faculty = (Faculty) getUpdate(faculty);
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getName().toString().trim();
                         try
                         {
                             for (Course i : faculty.getCourses())
                             {
-                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                if (i.getName().trim().toString().equals(selectedCourse))
                                 {
                                     System.out.println("You've already joined the course.");
                                     return;
@@ -116,21 +227,39 @@ public class FacultyActivity extends Application implements Initializable
                         {
 
                         }
+
                         for (Course i : Main.allCourses)
                         {
-                            if (i.getCode().trim().toString().equals(selectedCourse))
+                            if (i.getName().trim().toString().equals(selectedCourse))
                             {
                                 faculty.addCourse(i);
                                 System.out.println("Course Added.");
                                 try
                                 {
-                                    Main.serialize(faculty, "users/" + faculty.getName());
+                                    setUpdate();
                                 } catch (IOException e1)
                                 {
                                     e1.printStackTrace();
                                 }
                                 break;
                             }
+                        }
+                        try
+                        {
+                            setUpdate();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        try
+                        {
+                            refresh();
+                        } catch (ParseException e)
+                        {
+                            e.printStackTrace();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -142,18 +271,24 @@ public class FacultyActivity extends Application implements Initializable
                     @Override
                     public void handle(ActionEvent event)
                     {
-                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getCode().toString().trim();
+                        try
+                        {
+                            faculty = (Faculty) getUpdate(faculty);
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        String selectedCourse = coursesTable.getSelectionModel().getSelectedItem().getName().toString().trim();
                         try
                         {
                             for (Course i : faculty.getCourses())
                             {
-                                if (i.getCode().trim().toString().equals(selectedCourse))
+                                if (i.getName().trim().toString().equals(selectedCourse))
                                 {
                                     faculty.getCourses().remove(i);
-                                    Main.serialize(faculty, "users/" + faculty.getName());
+                                    setUpdate();
                                     if (myCourses.isSelected()) myCoursesListener();
-                                    System.out.println("Course Successfully Removed");
-                                    return;
+                                    break;
                                 }
                             }
                         } catch (Exception e1)
@@ -161,6 +296,23 @@ public class FacultyActivity extends Application implements Initializable
 
                         }
                         System.out.println("It's not your Course.");
+                        try
+                        {
+                            setUpdate();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        try
+                        {
+                            refresh();
+                        } catch (ParseException e)
+                        {
+                            e.printStackTrace();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 removeMenuItem.setStyle("-fx-font-size: 13;");
@@ -210,9 +362,12 @@ public class FacultyActivity extends Application implements Initializable
                     if (item != null)
                     {
                         Label text = new Label(item);
-                        text.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14;");
+                        text.setStyle("-fx-text-fill: white; -fx-font-size: 14");
                         text.setWrapText(true);
+                        text.setAlignment(Pos.TOP_CENTER);
+                        text.setAlignment(Pos.TOP_CENTER);
                         this.setGraphic(text);
+                        this.setAlignment(Pos.TOP_CENTER);
                     }
                 }
             };
@@ -231,57 +386,161 @@ public class FacultyActivity extends Application implements Initializable
                         Label text = new Label(item);
                         text.setStyle("-fx-text-fill: white;");
                         text.setWrapText(true);
+                        text.setAlignment(Pos.TOP_CENTER);
+                        text.setAlignment(Pos.TOP_CENTER);
                         this.setGraphic(text);
+                        this.setAlignment(Pos.TOP_CENTER);
                     }
                 }
             };
             return cell;
         });
-        
-        for (int i = 0; i < 7; i++)
-        {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate localDate = LocalDate.now().plusDays(i);
-            day.getItems().add(dtf.format(localDate) + " " + localDate.getDayOfWeek());
-        }
 
+        room.getItems().add("nil");
         for (Room r : Main.allRooms)
             room.getItems().add(r.getName().toUpperCase());
+    }
 
-
-        for (int a = 0; a < 24; a++)
+    //View All Rooms detail.
+    public void viewAllRooms() throws ParseException, IOException
+    {
+        // update structure(database)
+        roomList.getItems().clear();
+        faculty = (Faculty) getUpdate(faculty);
+        SimpleDateFormat format = new SimpleDateFormat("H:mm");
+        for (Room i : Main.allRooms) // Traversing allRooms
         {
-            try
+            Label la1 = new Label(i.getName().toUpperCase());
+            la1.setStyle("-fx-font-size: 16; -fx-text-fill: white;");
+
+            roomList.getItems().add(la1);
+            ArrayList<ArrayList<Date[]>> status = i.getTimeIntevals();
+
+            for (int d = 0; d < 7; d++) // Add Day of week details
             {
-                sTimeInterval.getItems().add(timeInterval(a));
-                eTimeInterval.getItems().add(timeInterval(a));
-                a += 0;
-            } catch (Exception e)
-            {
-                e.printStackTrace();
+                HBox hb = new HBox();
+
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                String temp = days[d] + ": ";
+                Label ll = new Label(temp.toUpperCase());
+                ll.setStyle("-fx-text-fill: white");
+                ll.setMinWidth(70);
+                hb.getChildren().add(ll);
+
+                ArrayList<Date[]> ti = new ArrayList<>();
+                ti = status.get(d);
+
+                if (ti.size() == 0)
+                {
+                    VBox vb = new VBox();
+                    vb.getChildren().addAll(new Label(), new Label());
+                    hb.getChildren().add(vb);
+                }
+
+                for (int a = 0; a < ti.size(); a++) //check timetable rooms
+                {
+                    VBox vb = new VBox();
+
+                    String sTime = format.format(ti.get(a)[0]);
+                    String eTime = format.format(ti.get(a)[1]);
+
+                    vb.setAlignment(Pos.TOP_CENTER);
+                    Label l1 = new Label("Always");
+                    l1.setAlignment(Pos.TOP_CENTER);
+                    l1.setTextAlignment(TextAlignment.CENTER);
+                    l1.setContentDisplay(ContentDisplay.TOP);
+                    Label l2 = new Label(sTime + "-" + eTime);
+                    l2.setAlignment(Pos.TOP_CENTER);
+                    l2.setTextAlignment(TextAlignment.CENTER);
+                    l1.setStyle("-fx-text-fill: white");
+                    l2.setStyle("-fx-text-fill: white");
+
+                    vb.getChildren().addAll(l1, l2);
+                    hb.getChildren().addAll(vb, new Label("    "));
+                }
+                for (Date[] dd : i.getBooked()) // check rooms booked by users
+                {
+//                    System.out.println(dd[0].toString());
+                    if (dd[0].toString().split(" ")[0].equals(days[d].substring(0, 3)))
+                    {
+                        temp = new SimpleDateFormat("H:mm").format(dd[0]) + "-" + new SimpleDateFormat("H:mm").format(dd[1]) + ", ";
+                        VBox vb = new VBox();
+                        vb.setAlignment(Pos.TOP_CENTER);
+                        Label l1 = new Label(dd[0].toString().substring(4, 10) + " " + dd[0].toString().split(" ")[5]);
+                        l1.setAlignment(Pos.TOP_CENTER);
+                        l1.setTextAlignment(TextAlignment.CENTER);
+                        l1.setContentDisplay(ContentDisplay.TOP);
+                        Label l2 = new Label(dd[0].toString().split(" ")[3].substring(0, 5) + "-" + dd[1].toString().split(" ")[3].substring(0, 5));
+                        l2.setAlignment(Pos.TOP_CENTER);
+                        l2.setTextAlignment(TextAlignment.CENTER);
+                        l1.setStyle("-fx-text-fill: white");
+                        l2.setStyle("-fx-text-fill: white");
+
+                        vb.getChildren().addAll(l1, l2);
+                        hb.getChildren().addAll(vb, new Label("   "));
+
+                    }
+                }
+                roomList.getItems().add(hb);
             }
+            roomList.getItems().add("");
         }
     }
 
-    public void bookRoom(ActionEvent event) throws ParseException, IOException
+    // Book a Room
+    public void bookRoom() throws IOException, ParseException
     {
-        SimpleDateFormat format = new SimpleDateFormat("H:mm");
-        if (room.getSelectionModel().isEmpty())
+        // if room is not selected by user. Provide empty room automatically else provide room given by user.
+        if ((!room.getSelectionModel().isEmpty()) && (!room.getSelectionModel().getSelectedItem().toString().equals("nil")))
         {
-            System.out.println("Select Room.");
-            Main.callPop("Select Room");
+            int t = bookRoom2(room.getSelectionModel().getSelectedItem().toString().toLowerCase());
+            if (t == 1)
+            {
+                Main.callPop("Request Sent to Admin.");
+                return;
+            }
+            else if (t == -1)
+            {
+                return;
+            }
         }
-        else if (day.getSelectionModel().isEmpty())
+        else
+        {
+            for (Room r : Main.allRooms)
+            {
+                int t = bookRoom2(r.getName());
+                if (t == 1)
+                {
+                    Main.callPop("Request Sent to Admin.");
+                    return;
+                }
+                else if (t == -1)
+                {
+                    return;
+                }
+            }
+        }
+        Main.callPop("Room not available.");
+    }
+
+    //func called by bookRoom()
+    public int bookRoom2(String autoRoom) throws ParseException, IOException
+    {
+        //get update from database
+        faculty = (Faculty) getUpdate(faculty);
+
+        SimpleDateFormat format = new SimpleDateFormat("H:mm");
+        if (day.getValue() == null)
         {
             System.out.println("Select Date");
             Main.callPop("Select Date");
         }
-        else if (sTimeInterval.getSelectionModel().isEmpty())
+        else if (sTimeInterval.getValue() == null)
         {
             System.out.println("Select Start Time");
             Main.callPop("Select Start Time");
         }
-        else if (eTimeInterval.getSelectionModel().isEmpty())
+        else if (eTimeInterval.getValue() == null)
         {
             System.out.println("Select End Time");
             Main.callPop("Select End Time");
@@ -292,22 +551,35 @@ public class FacultyActivity extends Application implements Initializable
         }
         else
         {
-            String roomname = room.getSelectionModel().getSelectedItem().toString().toLowerCase();
-            String Day = day.getSelectionModel().getSelectedItem().toString();
-            String s = sTimeInterval.getSelectionModel().getSelectedItem().toString();
-            String e = eTimeInterval.getSelectionModel().getSelectedItem().toString();
+            String roomname = autoRoom;
+            String Day = new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(day.getValue().toString()));
+            System.out.println(Day);
+            String s = (sTimeInterval.getValue().toString());
+            String e = (eTimeInterval.getValue().toString());
             Date startTime = format.parse(s);
             Date endTime = format.parse(e);
-            if (startTime.compareTo(endTime) >= 0)
+            System.out.println(s + " " + e);
+
+            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy H:mm");
+            String strDate = sdf.format(cal.getTime());
+            if (sdf.parse(Day + " " + s).compareTo(sdf.parse(strDate)) < 0) //if past date is selected
+            {
+                System.out.println("Select valid date.");
+                Main.callPop("Select valid Date");
+                return -1;
+            }
+            if (startTime.compareTo(endTime) >= 0) // wrong time interval
             {
                 Main.callPop("Select a valid interval.");
-                return;
+                return -1;
             }
 
             int dayIndex = -1;
-            for (int i = 0; i < 7; i++)
+            SimpleDateFormat onlyDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            for (int i = 0; i < 7; i++) // get day of week
             {
-                if (Day.split(" ")[1].equals(days[i].toUpperCase()))
+                if (day.getValue().getDayOfWeek().toString().toUpperCase().equals(days[i].toUpperCase()))
                 {
                     dayIndex = i;
                     break;
@@ -316,7 +588,7 @@ public class FacultyActivity extends Application implements Initializable
 
             Room r = null;
             ArrayList<ArrayList<Date[]>> status = new ArrayList<>();
-            for (Room room : Main.allRooms)
+            for (Room room : Main.allRooms) // get room
             {
                 if (room.getName().equals(roomname))
                 {
@@ -328,24 +600,23 @@ public class FacultyActivity extends Application implements Initializable
 
             System.out.println(r + " " + roomname + " " + Day + " " + format.format(startTime) + " " + format.format(endTime));
             boolean avail = true;
-            for (int i = 0; i < status.get(dayIndex).size(); i++)
+            for (int i = 0; i < status.get(dayIndex).size(); i++) // timetable intervals checking
             {
                 if (!(startTime.compareTo(status.get(dayIndex).get(i)[1]) >= 0 || endTime.compareTo(status.get(dayIndex).get(i)[0]) <= 0))
                 {
                     avail = false;
                     System.out.println("Room Not Available");
-                    Main.callPop("Room Not Available");
-                    return;
+//                    Main.callPop("Room Not Available");
+                    return 0;
                 }
             }
 
             format = new SimpleDateFormat("dd/MM/yyyy H:mm");
-            startTime = format.parse(Day.split(" ")[0] + " " + s);
-            endTime = format.parse(Day.split(" ")[0] + " " + e);
-            for (int i = 0; i < r.getBooked().size(); i++)
+            startTime = format.parse(Day + " " + s);
+            endTime = format.parse(Day + " " + e);
+            for (int i = 0; i < r.getBooked().size(); i++)   // room booked by user checking
             {
                 Date[] whole = r.getBooked().get(i);
-                SimpleDateFormat onlyDateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 if (!(onlyDateFormat.format(startTime).equals(onlyDateFormat.format(whole[0]))))
                 {
                     continue;
@@ -355,126 +626,94 @@ public class FacultyActivity extends Application implements Initializable
                 {
                     avail = false;
                     System.out.println("Room Not Available");
-                    Main.callPop("Room Not Available");
-                    return;
+//                    Main.callPop("Room Not Available");
+                    return 0;
                 }
             }
-            if (avail)
+            if (avail)  // if room is available
             {
                 System.out.println("Room Available");
-                r.getBooked().add(new Date[]{format.parse(Day.split(" ")[0] + " " + s), format.parse(Day.split(" ")[0] + " " + e)});
+
+                r.getBooked().add(new Date[]{format.parse(Day + " " + s), format.parse(Day + " " + e)});
 
                 HashMap<String, ArrayList<ArrayList<Object>>> br = faculty.getBookedRoom();
                 if (br.containsKey(r.getName()))
                 {
                     ArrayList<Object> ar = new ArrayList<Object>();
-                    ar.add(format.parse(Day.split(" ")[0] + " " + s));
-                    ar.add(format.parse(Day.split(" ")[0] + " " + e));
+                    ar.add(format.parse(Day + " " + s));
+                    ar.add(format.parse(Day + " " + e));
                     ar.add(reason.getText().toString().trim());
-                    ar.add((boolean) false);
                     br.get(r.getName()).add(ar);
                     System.out.println(br.toString());
                 }
                 else
                 {
                     ArrayList<Object> ar = new ArrayList<Object>();
-                    ar.add(format.parse(Day.split(" ")[0] + " " + s));
-                    ar.add(format.parse(Day.split(" ")[0] + " " + e));
+                    ar.add(format.parse(Day + " " + s));
+                    ar.add(format.parse(Day + " " + e));
                     ar.add(reason.getText().toString().trim());
-                    ar.add((boolean) false);
                     ArrayList<ArrayList<Object>> arr = new ArrayList<>();
                     arr.add(ar);
                     br.put(r.getName(), arr);
                     System.out.println(br.toString());
                 }
-                // Room Booked and serialize room and admin object
-                Main.serialize(r, "rooms/" + r.getName());
-                Main.serialize(faculty, "users/" + faculty.getEmail());
-                viewAllRooms();
+                // Room Booked and serialize room and faculty object
+                setUpdate(); //udate database
+                refresh(); // refresh application
+                return 1;
                 // refresh function call
             }
             else
             {
                 System.out.println("Room Not Available");
-                Main.callPop("Room Not Available");
+//                Main.callPop("Room Not Available");
+                return 0;
             }
         }
+        return -1;
     }
 
-    public void viewAllRooms() throws ParseException
+    // room booked by current user
+    public void bookedRoom() throws IOException
     {
+        //get update from database
+        faculty = (Faculty) getUpdate(faculty);
+
         roomList.getItems().clear();
-        SimpleDateFormat format = new SimpleDateFormat("H:mm");
-        for (Room i : Main.allRooms)
-        {
-            Label la1 = new Label(i.getName().toUpperCase());
-            la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white");
-
-            roomList.getItems().add(la1);
-            ArrayList<ArrayList<Date[]>> status = i.getTimeIntevals();
-            for (int d = 0; d < 7; d++)
-            {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                LocalDate localDate = LocalDate.now().plusDays(d);
-                String temp = dtf.format(localDate) + " " + localDate.getDayOfWeek() + ": ";
-
-                ArrayList<Date[]> ti = new ArrayList<>();
-                for (int j = 0; j < 6; j++)
-                {
-                    if (days[j].toUpperCase().equals(localDate.getDayOfWeek().toString().toUpperCase()))
-                    {
-                        ti = status.get(j);
-                    }
-                }
-                for (int a = 0; a < ti.size(); a++)
-                {
-
-                    String sTime = format.format(ti.get(a)[0]);
-                    String eTime = format.format(ti.get(a)[1]);
-
-                    temp += sTime + "-" + eTime + ", ";
-                }
-
-                for (Date[] dd : i.getBooked())
-                {
-                    if (new SimpleDateFormat("dd/MM/yyyy").format(dd[0]).equals(dtf.format(localDate)))
-                    {
-                        temp += new SimpleDateFormat("H:mm").format(dd[0]) + "-" + new SimpleDateFormat("H:mm").format(dd[1]) + ", ";
-                    }
-                }
-                roomList.getItems().add(temp);
-            }
-            roomList.getItems().add("");
-        }
-    }
-
-    public void bookedRoom()
-    {
-        roomList.getItems().clear();
-        if (faculty.getBookedRoom() == null)
+        if (faculty.getBookedRoom() == null) // no room booked
         {
             roomList.getItems().add("No Room is Booked.");
             Main.callPop("No Room is Booked.");
         }
         else
         {
-            for (String k : faculty.getBookedRoom().keySet())
+            for (String k : faculty.getBookedRoom().keySet())// get booked room
             {
                 for (ArrayList<Object> i : faculty.getBookedRoom().get(k))
                 {
                     SimpleDateFormat format = new SimpleDateFormat("H:mm");
                     Label la1 = new Label(k.toUpperCase());
-                    la1.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
+                    la1.setStyle("-fx-text-fill: white; -fx-font-size: 16");
 
                     roomList.getItems().add(la1);
                     roomList.getItems().add(new SimpleDateFormat("dd/M/yyyy").format(i.get(0)) + ": " + format.format(i.get(0)) + " - " + format.format(i.get(1)));
                     roomList.getItems().add("Reason: " + i.get(2));
                     Button cancel = new Button("Cancel Booking");
-                    cancel.setOnAction(new EventHandler<ActionEvent>()
+                    cancel.setOnAction(new EventHandler<ActionEvent>() // cancel rom booking
                     {
                         @Override
                         public void handle(ActionEvent event)
                         {
+                            try
+                            {
+                                refresh();
+                            } catch (ParseException e)
+                            {
+                                e.printStackTrace();
+                            } catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
                             for (Room r : Main.allRooms)
                             {
                                 if (r.getName().equals(k))
@@ -484,35 +723,35 @@ public class FacultyActivity extends Application implements Initializable
                                     {
                                         if ((dd[0].compareTo((Date) i.get(0)) == 0) && dd[1].compareTo((Date) i.get(1)) == 0)
                                         {
-                                            try
-                                            {
-                                                da.remove(dd);
-                                                Main.serialize(r, "rooms/" + r.getName());
-                                            } catch (Exception e)
-                                            {
-                                            }
+                                            da.remove(dd);
                                         }
                                         break;
                                     }
                                 }
+                                // serialize room and faculty
                                 faculty.getBookedRoom().get(k).remove(i);
-                                // serialize room and admin
                                 try
                                 {
-                                    Main.serialize(faculty, "users/" + faculty.getEmail());
+                                    setUpdate();
                                 } catch (IOException e)
                                 {
                                     e.printStackTrace();
                                 }
-                                roomList.getItems().clear();
-                                bookedRoom();
-                                try
-                                {
-                                    viewAllRooms();
-                                } catch (ParseException e)
-                                {
-                                    e.printStackTrace();
-                                }
+                            }
+                            try
+                            {
+                                setUpdate();
+                            } catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            roomList.getItems().clear();
+                            try
+                            {
+                                refresh();
+                            } catch (Exception e)
+                            {
+                                e.printStackTrace();
                             }
                         }
                     });
@@ -522,55 +761,11 @@ public class FacultyActivity extends Application implements Initializable
         }
     }
 
-    private static String timeInterval(int initial) throws ParseException
+    // refresh application
+    public void refresh() throws ParseException, IOException
     {
-        String time1 = "08:00:00";
-        String time2 = "08:00:00";
+        faculty = (Faculty) getUpdate(faculty);
 
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-        Date date1 = format.parse(time1);
-        Date date2 = format.parse(time2);
-
-        long curTimeInMs = date1.getTime();
-        date2 = new Date(curTimeInMs + ((initial) * 60000 * 30));
-        return new SimpleDateFormat("H:mm").format(date2);
-    }
-
-    public void myCoursesListener()
-    {
-//        item1.setDisable(true);
-//        item2.setDisable(false);
-        coursesTable.setItems(null);
-        if (faculty.getCourses().isEmpty()) return;
-
-        coursesTable.refresh();
-        ArrayList<Course> currMyCourses = faculty.getCourses();
-        ObservableList<Course> items = FXCollections.observableArrayList();
-        for (Course i : currMyCourses)
-            items.add(i);
-
-        coursesTable.setItems(items);
-
-    }
-
-    public void setAllCoursesListener()
-    {
-//        item2.setDisable(true);
-//        item1.setDisable(false);
-
-        coursesTable.setItems(null);
-//        for (int i = 0; i < coursesTable.getItems().size(); i++)
-//            coursesTable.getItems().clear();
-        coursesTable.refresh();
-        ObservableList<Course> items = FXCollections.observableArrayList();
-        for (Course i : Main.allCourses)
-            items.add(i);
-
-        coursesTable.setItems(items);
-    }
-
-    public void refresh(MouseEvent mouseEvent) throws ParseException
-    {
         if (roomsDetail.isSelected()) viewAllRooms();
         else if (roomsBooked.isSelected()) bookedRoom();
         if (myCourses.isSelected()) myCoursesListener();
@@ -578,8 +773,10 @@ public class FacultyActivity extends Application implements Initializable
         viewTimeTable();
     }
 
-    public void viewTimeTable() throws ParseException
+    // display faculty timetable
+    public void viewTimeTable() throws ParseException, IOException
     {
+        faculty = (Faculty) getUpdate(faculty);
         tableView.getColumns().clear();
         for (int i = 0; i < tableView.getItems().size(); i++)
         {
@@ -645,4 +842,5 @@ public class FacultyActivity extends Application implements Initializable
         // Add Data
         tableView.getItems().addAll(data);
     }
+
 }

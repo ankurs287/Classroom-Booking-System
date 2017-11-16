@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.ToggleGroup?>
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
-
-<Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.AdminActivity">
+<Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="main.AdminActivity">
     <ImageView fitHeight="467.0" fitWidth="677.0" pickOnBounds="true">
         <image>
-            <Image url="@../resources/bg.png" />
+            <Image url="@../resources/ryan-holloway-273158.jpg"/>
         </image>
     </ImageView>
-    <TabPane layoutY="39.0" prefHeight="430.0" prefWidth="670.0" rotateGraphic="true" side="LEFT" stylesheets="@../resources/application.css" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0" tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <TabPane fx:id="tabPane" layoutY="39.0" prefHeight="430.0" prefWidth="670.0" rotateGraphic="true" side="LEFT"
+             stylesheets="@../resources/application.css" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="100.0"
+             tabMaxWidth="60.0" tabMinHeight="100.0" tabMinWidth="60.0" xmlns="http://javafx.com/javafx/8.0.121"
+             xmlns:fx="http://javafx.com/fxml/1">
         <tabs>
             <Tab>
                 <graphic>
                     <StackPane rotate="90.0">
-                        <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0" text="Book a Room" textFill="WHITE" wrapText="true" />
+                        <Label minHeight="50.0" minWidth="90.0" prefHeight="60.0" prefWidth="79.0" rotate="90.0"
+                               text="Book a Room" textFill="WHITE" wrapText="true"/>
                     </StackPane>
                 </graphic>
                 <content>
                     <Pane minHeight="0.0" minWidth="0.0" prefHeight="360.0" prefWidth="570.0">
                         <children>
-                            <Button fx:id="btnbook" layoutX="398.0" layoutY="379.0" mnemonicParsing="false" onAction="#bookRoom" prefHeight="25.0" prefWidth="157.0" text="Book" wrapText="true" />
-                            <ListView fx:id="roomList" layoutX="14.0" layoutY="33.0" prefHeight="371.0" prefWidth="372.0">
+                            <JFXButton fx:id="btnbook" buttonType="RAISED" layoutX="398.0" layoutY="379.0"
+                                       mnemonicParsing="false" onAction="#bookRoom" prefHeight="25.0" prefWidth="157.0"
+                                       text="Book" wrapText="true"/>
+                            <JFXListView fx:id="roomList" layoutX="14.0" layoutY="33.0" prefHeight="371.0"
+                                         prefWidth="372.0">
                                 <placeholder>
-                                    <Label text="Nothing found" textFill="white">
+                                    <Label text="Nothing found. Try Refreshing." textFill="white">
                                         <font>
-                                            <Font size="18.0" />
+                                            <Font size="18.0"/>
                                         </font>
                                     </Label>
                                 </placeholder>
-                            </ListView>
-                            <ComboBox fx:id="day" layoutX="398.0" layoutY="33.0" prefHeight="25.0" prefWidth="157.0" promptText="Date" />
-                            <ComboBox fx:id="sTimeInterval" layoutX="398.0" layoutY="113.0" prefHeight="25.0" prefWidth="157.0" promptText="Start Time" />
-                            <ComboBox fx:id="eTimeInterval" layoutX="398.0" layoutY="153.0" prefHeight="25.0" prefWidth="157.0" promptText="End Time" />
-                            <TextArea fx:id="reason" layoutX="398.0" layoutY="193.0" prefHeight="169.0" prefWidth="157.0" promptText="Reason" />
-                            <ComboBox fx:id="room" layoutX="398.0" layoutY="73.0" prefHeight="25.0" prefWidth="157.0" promptText="Room" />
-                            <RadioButton fx:id="roomsDetail" layoutX="14.0" layoutY="6.0" mnemonicParsing="false" onAction="#viewAllRooms" text="Rooms Detail" textFill="WHITE">
+                            </JFXListView>
+                            <JFXTextArea fx:id="reason" focusColor="WHITE" labelFloat="true" layoutX="398.0"
+                                         layoutY="213.0" prefHeight="149.0" prefWidth="157.0" promptText="Reason"
+                                         unFocusColor="WHITE"/>
+                            <JFXComboBox fx:id="room" focusColor="WHITE" labelFloat="true" layoutX="398.0"
+                                         layoutY="33.0" prefHeight="25.0" prefWidth="157.0" promptText="Room"
+                                         unFocusColor="WHITE"/>
+                            <JFXRadioButton fx:id="roomsDetail" layoutX="14.0" layoutY="6.0" mnemonicParsing="false"
+                                            onAction="#viewAllRooms" selectedColor="white" text="Rooms Detail"
+                                            textFill="WHITE" unSelectedColor="white">
                                 <toggleGroup>
-                                    <ToggleGroup fx:id="rr" />
+                                    <ToggleGroup fx:id="rr"/>
                                 </toggleGroup>
-                            </RadioButton>
-                            <RadioButton fx:id="roomsBooked" layoutX="130.0" layoutY="5.0" mnemonicParsing="false" onAction="#bookedRoom" text="Rooms Booked by you" textFill="WHITE" toggleGroup="$rr" />
-                            <RadioButton fx:id="requestsBtn" layoutX="288.0" layoutY="6.0" mnemonicParsing="false" onAction="#viewRequests" text="View Requests" textFill="WHITE" toggleGroup="$rr" wrapText="true" />
+                            </JFXRadioButton>
+                            <JFXRadioButton fx:id="roomsBooked" layoutX="121.0" layoutY="6.0" mnemonicParsing="false"
+                                            onAction="#bookedRoom" selectedColor="white" text="Rooms Booked by you"
+                                            textFill="WHITE" toggleGroup="$rr" unSelectedColor="white"/>
+                            <JFXDatePicker fx:id="day" defaultColor="GREY" editable="false" layoutX="398.0"
+                                           layoutY="78.0" prefHeight="25.0" prefWidth="157.0" promptText="Date"/>
+                            <JFXTimePicker fx:id="eTimeInterval" defaultColor="GREY" layoutX="398.0" layoutY="168.0"
+                                           prefHeight="25.0" prefWidth="157.0" promptText="End Time"/>
+                            <JFXTimePicker fx:id="sTimeInterval" defaultColor="GREY" layoutX="398.0" layoutY="123.0"
+                                           prefHeight="25.0" prefWidth="157.0" promptText="Start Time"/>
+                            <JFXRadioButton fx:id="requestsBtn" layoutX="279.0" layoutY="6.0" mnemonicParsing="false"
+                                            onAction="#viewRequests" selectedColor="white" text="View Requests"
+                                            textFill="WHITE" unSelectedColor="white" toggleGroup="$rr">
+                            </JFXRadioButton>
 
                         </children>
                     </Pane>
@@ -61,15 +75,17 @@
             </Tab>
         </tabs>
     </TabPane>
-    <Button fx:id="logout" layoutX="561.0" mnemonicParsing="false" onAction="#gotoHome" prefHeight="32.0" prefWidth="116.0" text="Log out" />
+    <JFXButton fx:id="logout" buttonType="RAISED" layoutX="561.0" mnemonicParsing="false" onAction="#gotoHome"
+               prefHeight="32.0" prefWidth="116.0" text="Log out"/>
     <Label fx:id="tname" layoutX="8.0" prefHeight="40.0" prefWidth="454.0" text="Welcome" textFill="WHITE">
         <font>
-            <Font size="14.0" />
+            <Font size="20.0"/>
         </font>
     </Label>
-    <ImageView fitHeight="25.0" fitWidth="28.0" layoutX="527.0" layoutY="4.0" onMouseClicked="#refresh" pickOnBounds="true">
+    <ImageView fitHeight="25.0" fitWidth="28.0" layoutX="527.0" layoutY="4.0" onMouseClicked="#refresh"
+               pickOnBounds="true">
         <image>
-            <Image url="@../resources/refresh.png" />
+            <Image url="@../resources/load3.gif"/>
         </image>
     </ImageView>
 </Pane>

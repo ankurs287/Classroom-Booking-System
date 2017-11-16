@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/*Courses Class to store courses offered by institute.
+* */
+
 public class Course implements Serializable
 {
     private String name;

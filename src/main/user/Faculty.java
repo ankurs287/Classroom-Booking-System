@@ -2,9 +2,10 @@ package main.user;
 
 import main.utilities.Course;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Faculty extends User
+public class Faculty extends User implements Serializable
 {
     ArrayList<Course> courses;
 

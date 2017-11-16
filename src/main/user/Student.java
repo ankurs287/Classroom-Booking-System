@@ -3,10 +3,11 @@ package main.user;
 import main.utilities.Course;
 import main.utilities.Timetable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Currency;
 
-public class Student extends User
+public class Student extends User implements Serializable
 {
     ArrayList<Course> courses = new ArrayList<>();
     Timetable myTimetable = new Timetable();

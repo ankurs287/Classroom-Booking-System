@@ -1,14 +1,28 @@
-#tname {
-    -fx-font-weight: bold;
+.root {
+    -fx-text-fill: white;
 }
 
 .button {
     -fx-background-color: white;
 }
 
+.label:focused {
+    -fx-text-fill: black;
+}
+
 .button:hover {
-    -fx-background-color: #213752;
+    -fx-background-color: #793e48;
     -fx-text-fill: white;
+}
+
+.text-field {
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: white;
+}
+
+.text-area {
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: white;
 }
 
 .tab-pane .tab-header-area .tab-header-background {
@@ -24,12 +38,20 @@
 }
 
 .tab-pane .tab {
-    -fx-background-color: black;
+    -fx-background-color: transparent;
 
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: #213752;
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-border-radius: 2, 1;
+    -fx-border-style: solid solid none solid;
+}
+
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
 }
 
 .tab .tab-label {
@@ -44,52 +66,61 @@
     -fx-text-fill: white;
 }
 
-.menu-item:hover {
-    -fx-background-color: #213752;
+#coursesList #roomList .menu-item:hover {
+    -fx-background-color: #793e48;
     -fx-text-fill: white;
 }
 
-.list-view {
-    -fx-background-color: black;
+#roomList {
+    -fx-background-color: transparent;
     -fx-text-fill: white;
 }
 
-.list-cell {
-    -fx-background-color: black;
+#roomList .list-cell {
+    -fx-background-color: transparent;
     -fx-text-fill: white;
 }
 
-.menu-item:focused {
-    -fx-background-color: #213752;
+#roomList .menu-item:focused {
+    /*-fx-background-color: #793e48;*/
 }
 
-.list-cell:filled:selected:focused {
-    -fx-background-color: #213752;
+#roomList .list-cell:filled:selected:focused {
+    /*-fx-background-color: #793e48;*/
+    -fx-text-fill: white;
+}
+
+#roomList .list-cell:filled:hover {
+    /*-fx-background-color: #793e48;*/
     -fx-text-fill: white;
 }
 
 .combo-box {
-    -fx-background-color: black;
     -fx-text-fill: white;
 }
 
-.combo-box:hover {
-    -fx-background-color: #213752;
+.combo-box .cell {
+    -fx-text-fill: white;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-text-fill: #793e48;
 }
 
 .combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #213752;
+    -fx-background-color: #793e48;
+    -fx-text-fill: white;
 }
 
 .table-view {
-    -fx-background-color: black;
+    -fx-background-color: transparent;
     -fx-border-width: 0;
     -fx-border-color: transparent;
     -fx-text-alignment: center;
     -fx-alignment: center;
 }
 
-#coursesTable {
+.table-view {
     -fx-table-cell-border-color: transparent;
 }
 
@@ -97,12 +128,11 @@
     -fx-max-height: 0;
     -fx-pref-height: 0;
     -fx-min-height: 0;
-    -fx-background-color: black;
     -fx-text-fill: white;
 }
 
 #coursesList .column-header-background {
-    -fx-background-color: #213752;
+    -fx-background-color: #793e48;
     -fx-text-fill: white;
 }
 
@@ -114,18 +144,218 @@
 }
 
 .table-row-cell {
-    -fx-background-color: black;
+    -fx-background-color: transparent;
     -fx-border-color: white;
     -fx-text-alignment: center;
     -fx-alignment: center;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #213752;
+    /*-fx-background-color: linear-gradient(white);*/
+    /*-fx-opacity: 0.2;*/
 }
-.table-row-cell:selected{
-    -fx-background-color: #213752;
+
+.table-row-cell:selected {
+    /*-fx-background-color: #793e48;*/
 }
+
 .table-row-cell:empty .table-cell {
     -fx-border-width: 0px;
+}
+
+/*The Big Code*/
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+#roomList .increment-button, #roomList .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 2em;
+
+}
+
+/*!* The main scrollbar **track** CSS class  *!*/
+#roomList .scroll-bar:horizontal .track,
+#roomList .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: derive(white, 80%);
+
+    -fx-background-radius: 2em;
+    -fx-border-radius: 2em;
+}
+
+/*!* The main scrollbar **thumb** CSS class which we drag every time (movable) *!*/
+#roomList .scroll-bar:horizontal .thumb,
+#roomList .scroll-bar:vertical .thumb {
+    -fx-background-color: derive(white, 90%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+
+}
+
+/*!* The main scrollbar **track** CSS class  *!*/
+#roomList .scroll-bar:horizontal .track,
+#roomList .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-radius: 2em;
+}
+
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+#roomList .scroll-bar:horizontal .increment-button,
+#roomList .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+
+}
+
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+
+#roomList .scroll-bar:vertical .increment-button,
+#roomList .scroll-bar:vertical .decrement-button {
+
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 0;
+
+}
+
+#roomList .scroll-bar .increment-arrow,
+#roomList .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/*!* The main scrollbar **thumb** CSS class which we drag every time (movable) *!*/
+#roomList .scroll-bar:horizontal .thumb,
+#roomList .scroll-bar:vertical .thumb {
+    -fx-background-color: derive(white, 90%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+
+}
+
+#roomList .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+#roomList .scroll-bar .increment-button {
+    visibility: hidden;
+}
+
+#roomList .scroll-bar .decrement-button {
+    visibility: hidden;
+}
+
+#roomList .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+#roomList .scroll-bar:vertical .track-background {
+    visibility: hidden;
+}
+
+#roomList .scroll-bar:vertical .track {
+    visibility: hidden;
+}
+
+#roomList .hide-thumb .scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+}
+
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+.table-view .increment-button, .table-view .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 2em;
+
+}
+
+/*!* The main scrollbar **track** CSS class  *!*/
+.table-view .scroll-bar:horizontal .track,
+.table-view .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: derive(white, 80%);
+
+    -fx-background-radius: 2em;
+    -fx-border-radius: 2em;
+}
+
+/*!* The main scrollbar **thumb** CSS class which we drag every time (movable) *!*/
+.table-view .scroll-bar:horizontal .thumb,
+.table-view .scroll-bar:vertical .thumb {
+    -fx-background-color: derive(white, 90%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+
+}
+
+/*!* The main scrollbar **track** CSS class  *!*/
+.table-view .scroll-bar:horizontal .track,
+.table-view .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-border-radius: 2em;
+}
+
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+.table-view .scroll-bar:horizontal .increment-button,
+.table-view .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+
+}
+
+/*!* The increment and decrement button CSS class of scrollbar *!*/
+
+.table-view .scroll-bar:vertical .increment-button,
+.table-view .scroll-bar:vertical .decrement-button {
+
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 0;
+
+}
+
+.table-view .scroll-bar .increment-arrow,
+.table-view .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/*!* The main scrollbar **thumb** CSS class which we drag every time (movable) *!*/
+.table-view .scroll-bar:horizontal .thumb,
+.table-view .scroll-bar:vertical .thumb {
+    -fx-background-color: derive(white, 90%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+
+}
+
+.table-view .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar .increment-button {
+    visibility: hidden;
+}
+
+.table-view .scroll-bar .decrement-button {
+    visibility: hidden;
+}
+
+.table-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar:vertical .track-background {
+    visibility: hidden;
+}
+
+.table-view .scroll-bar:vertical .track {
+    visibility: hidden;
+}
+
+.table-view .hide-thumb .scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
 }

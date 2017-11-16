@@ -1,12 +1,10 @@
 package main.user;
 
-import main.utilities.Room;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-
+/* User class to store users (Admin, Faculty, Student)
+* */
 public abstract class User implements Serializable
 {
     private String name;
@@ -67,6 +65,7 @@ public abstract class User implements Serializable
                 ", email='" + email + '\'' +
                 ", type='" + type + '\'' +
                 ", password='" + password + '\'' +
+                ",bookedroom=" + bookedRoom + '\'' +
                 '}';
     }
 

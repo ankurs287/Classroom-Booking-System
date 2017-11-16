@@ -19,45 +19,46 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.Properties;
 
-import static main.Main.allUsers;
-import static main.Main.searchUser;
-
+import static main.Main.*;
+/*To recover forgotten password*/
 public class ForgotPasswordActivity extends Application
 {
     private int otp = -1;
 
     @FXML
-    private TextField fEmail;
-    @FXML
-    private TextField fOTP;
+    private TextField fEmail, fOTP;
     @FXML
     private PasswordField fPassword;
     @FXML
-    private Button getotp;
-    @FXML
-    private Button resetbtn;
+    private Button getotp, resetbtn;
 
     @Override
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("forgotpasswordactivity.fxml"));
         primaryStage.setTitle("My Classroom");
-        primaryStage.setScene(new Scene(root, 344, 205));
+        Scene scene = new Scene(root, 344, 205);
+        scene.getStylesheets().add(getClass().getResource("../resources/application.css").toExternalForm());
+        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 
+    // get OTP to E-mail
     public void getOTP(ActionEvent event)
     {
         if (fEmail.getText().trim().toString().isEmpty() || fPassword.getText().toString().isEmpty())
         {
             System.out.println("All fields are mandantory");
+            Main.callPop("All fields are mandantory");
         }
         else if (!searchUser(fEmail.getText().trim().toString()))
         {
             System.out.println("Email ID does not exist");
+            Main.callPop("Email ID does not exist");
         }
         else
         {
@@ -100,6 +101,7 @@ public class ForgotPasswordActivity extends Application
                 Transport.send(message);
 
                 System.out.println("message sent successfully...");
+                Main.callPop("OTP sent successfully. Check you e-mail.");
                 fEmail.setDisable(true);
                 getotp.setDisable(true);
                 fOTP.setDisable(false);
@@ -109,15 +111,18 @@ public class ForgotPasswordActivity extends Application
             {
                 e.printStackTrace();
                 System.out.println("Try again after sometime.");
+                Main.callPop("Try again after sometime.");
             }
         }
     }
 
-    public void reset(ActionEvent event)
+    // check if OTP is correct and reset password
+    public void reset(ActionEvent event) throws IOException
     {
         if (!fOTP.getText().toString().equals("" + otp))
         {
             System.out.println("Please Enter Correct OTP sent to your Email id");
+            Main.callPop("Please Enter Correct OTP sent to your Email id");
             return;
         }
         for (User i : allUsers)
@@ -126,11 +131,14 @@ public class ForgotPasswordActivity extends Application
             {
                 i.setPassword(fPassword.getText().toString());
                 System.out.println("Password Changed Succesfully.");
+                Main.callPop("Password Changed Succesfully.");
                 return;
             }
         }
+        setUpdate();
     }
 
+    // go back t login/sign up
     public void goHome(ActionEvent event)
     {
         try

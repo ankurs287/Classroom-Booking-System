@@ -1,11 +1,12 @@
 package main.user;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Admin extends User
+public class Admin extends User implements Serializable
 {
-    public static HashMap<String, ArrayList<ArrayList<Object>>> requests=new HashMap<>(); // roomname: "user start end reason", "user start end reason"
+    public static HashMap<String, ArrayList<ArrayList<Object>>> requests=new HashMap<>(); // roomname: "user start end reason date", "user start end reason date"
 
     public Admin(String name, String email, String type, String password)
     {

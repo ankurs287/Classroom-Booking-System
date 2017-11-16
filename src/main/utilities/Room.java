@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+/*Room class to user room detaila
+* */
 public class Room implements Serializable
 {
     String name;
