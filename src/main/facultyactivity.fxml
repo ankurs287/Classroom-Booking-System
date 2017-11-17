@@ -19,6 +19,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
+<?import com.jfoenix.controls.JFXTextField?>
 <Pane prefHeight="460.0" prefWidth="670.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FacultyActivity">
     <ImageView fitHeight="467.0" fitWidth="677.0" pickOnBounds="true">
         <image>
@@ -80,7 +81,12 @@
                                     </Label>
                                 </placeholder>
                             </JFXListView>
-                            <JFXTextArea fx:id="reason" focusColor="WHITE" labelFloat="true" layoutX="398.0" layoutY="213.0" prefHeight="149.0" prefWidth="157.0" promptText="Reason" unFocusColor="WHITE" />
+                            <JFXTextField fx:id="cap" focusColor="WHITE" labelFloat="true" layoutX="398.0"
+                                          layoutY="214.0" prefHeight="25.0" prefWidth="157.0" promptText="Room Capacity"
+                                          unFocusColor="WHITE"/>
+                            <JFXTextArea fx:id="reason" focusColor="WHITE" labelFloat="true" layoutX="398.0"
+                                         layoutY="266.0" prefHeight="96.0" prefWidth="157.0" promptText="Reason"
+                                         unFocusColor="WHITE"/>
                             <JFXComboBox fx:id="room" focusColor="WHITE" labelFloat="true" layoutX="398.0" layoutY="33.0" prefHeight="25.0" prefWidth="157.0" promptText="Room" unFocusColor="WHITE" />
                             <JFXRadioButton fx:id="roomsDetail" layoutX="14.0" layoutY="6.0" mnemonicParsing="false" onAction="#viewAllRooms" selectedColor="white" text="Rooms Detail" textFill="WHITE" unSelectedColor="white">
                                 <toggleGroup>

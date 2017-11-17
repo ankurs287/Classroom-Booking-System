@@ -48,17 +48,17 @@ public class ForgotPasswordActivity extends Application
     }
 
     // get OTP to E-mail
-    public void getOTP(ActionEvent event)
+    public void getOTP(ActionEvent event) throws InterruptedException
     {
         if (fEmail.getText().trim().toString().isEmpty() || fPassword.getText().toString().isEmpty())
         {
             System.out.println("All fields are mandantory");
-            Main.callPop("All fields are mandantory");
+            callPop("All fields are mandantory");
         }
         else if (!searchUser(fEmail.getText().trim().toString()))
         {
             System.out.println("Email ID does not exist");
-            Main.callPop("Email ID does not exist");
+            callPop("Email ID does not exist");
         }
         else
         {
@@ -92,26 +92,25 @@ public class ForgotPasswordActivity extends Application
                 MimeMessage message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(user));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-                message.setSubject("Registration: Classroom Booking System");
-                String messageBody = "Thank you for registering. You OTP is: ";
-                messageBody = messageBody + randomPIN + ".";
+                message.setSubject("Password Recovery: Classroom Booking System");
+                String messageBody = "You OTP is: ";
+                messageBody = messageBody + randomPIN + ". Use it to recover your password.";
                 message.setText(messageBody);
 
                 //send the message
                 Transport.send(message);
 
                 System.out.println("message sent successfully...");
-                Main.callPop("OTP sent successfully. Check you e-mail.");
+                callPop("OTP sent successfully. Check you e-mail.");
                 fEmail.setDisable(true);
                 getotp.setDisable(true);
                 fOTP.setDisable(false);
                 resetbtn.setDisable(false);
-
             } catch (Exception e)
             {
                 e.printStackTrace();
                 System.out.println("Try again after sometime.");
-                Main.callPop("Try again after sometime.");
+                callPop("Try again after sometime.");
             }
         }
     }
@@ -122,7 +121,7 @@ public class ForgotPasswordActivity extends Application
         if (!fOTP.getText().toString().equals("" + otp))
         {
             System.out.println("Please Enter Correct OTP sent to your Email id");
-            Main.callPop("Please Enter Correct OTP sent to your Email id");
+            callPop("Please Enter Correct OTP sent to your Email id");
             return;
         }
         for (User i : allUsers)
@@ -131,7 +130,7 @@ public class ForgotPasswordActivity extends Application
             {
                 i.setPassword(fPassword.getText().toString());
                 System.out.println("Password Changed Succesfully.");
-                Main.callPop("Password Changed Succesfully.");
+                callPop("Password Changed Succesfully.");
                 return;
             }
         }

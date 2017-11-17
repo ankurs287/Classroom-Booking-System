@@ -4,11 +4,18 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import main.user.Admin;
 import main.user.Faculty;
 import main.user.Student;
@@ -25,8 +32,11 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /*Main Class for login / sign up and database reading*/
 public class Main extends Application implements Serializable
@@ -58,7 +68,7 @@ public class Main extends Application implements Serializable
         primaryStage.show();
     }
 
-    public static void main(String[] args) throws IOException, ParseException
+    public static void main(String[] args) throws IOException, ParseException, InterruptedException
     {
         syncDB(); //sync Database (deserialize rooms courses, users)
         launch(args);
@@ -129,24 +139,24 @@ public class Main extends Application implements Serializable
     // send OTP for signup process
     public void sendOTP(ActionEvent event) throws Exception
     {
-        goToSignup(new ActionEvent());
-        if (1 == 1) return;
+//        goToSignup(new ActionEvent());
+//        if (1 == 1) return;
         if (sName.getText().trim().toString().isEmpty() || sEmail.getText().trim().toString().isEmpty() || sPassword.getText().toString().isEmpty())
         {
             System.out.println("All fields are mandatory.");
             callPop("All fields are mandatory.");
         }
-        else if (!validity(sEmail.getText().trim().toString()))
+        else if (!validity(sEmail.getText().trim().toString().toLowerCase()))
         {
-            System.out.println("Input a valid e-mail address.");
-            callPop("Input a valid e-mail address.");
+            System.out.println("Input a valid IIITD e-mail address.");
+            callPop("Input a valid IIITD e-mail address.");
         }
         else if (role.getSelectionModel().isEmpty())
         {
             System.out.println("Choose your role.");
             callPop("Choose your role.");
         }
-        else if (searchUser(sEmail.getText().trim().toString()))
+        else if (searchUser(sEmail.getText().trim().toString().toLowerCase()))
         {
             System.out.println("User with same Email address already exists.");
             callPop("User with same Email address already exists.");
@@ -157,9 +167,9 @@ public class Main extends Application implements Serializable
             int randomPIN = (int) (Math.random() * 9000) + 1000;
             otp = randomPIN;
             final String user = "classroom.booking.system@gmail.com";//change accordingly
-            final String password = "";//change accordingly
+            final String password = "ankur+anvit";//change accordingly
 
-            String to = sEmail.getText().trim().toString();//change accordingly
+            String to = sEmail.getText().trim().toString().toLowerCase();//change accordingly
 
             //Get the session object
             Properties props = new Properties();
@@ -220,7 +230,7 @@ public class Main extends Application implements Serializable
             System.out.println("Enter correct OTP sent to your Email id.");
             callPop("Enter correct OTP sent to your Email id.");
             sOTP.clear();
-//            return;
+            return;
         }
         if (chk.equals("Admin"))
         {
@@ -237,6 +247,55 @@ public class Main extends Application implements Serializable
         allUsers.add(user);
         serialize(allUsers, "users.a");
 
+        sOTP.clear();
+        sName.setDisable(false);sName.clear();
+        sEmail.setDisable(false);sEmail.clear();
+        sPassword.setDisable(false);sPassword.clear();
+        role.setDisable(false);
+        getOTP.setDisable(false);
+        signup.setDisable(true);
+        sOTP.setDisable(true);
+
+        final String userf = "classroom.booking.system@gmail.com";//change accordingly
+        final String password = "ankur+anvit";//change accordingly
+
+        String to = user.getEmail();//change accordingly
+
+        //Get the session object
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator()
+        {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication()
+            {
+                return new PasswordAuthentication(userf, password);
+            }
+        });
+
+        //Compose the message
+        try
+        {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(userf));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject("Registration: Classroom Booking System");
+            String messageBody = "Thank you for registering. You Login credentials are as follows: \nusername:" + user.getEmail() + "\n password:" + user.getPassword();
+            message.setText(messageBody);
+
+            //send the message
+            Transport.send(message);
+
+            System.out.println("message sent successfully...");
+        }
+        catch (Exception er)
+        {
+            System.out.println("credentials not sent.");
+        }
         callPop("Thanks for Signing up. You may login now.");
     }
 
@@ -256,7 +315,7 @@ public class Main extends Application implements Serializable
     {
         if (trim.endsWith("@iiitd.ac.in"))
             return true;
-        return true;
+        return false;
     }
 
     // login is credentials are correct
@@ -267,10 +326,10 @@ public class Main extends Application implements Serializable
             System.out.println("All fields are mandatory.");
             callPop("All fields are mandatory.");
         }
-        else if (!validity(sEmail.getText().trim().toString()))
+        else if (!validity(lName.getText().trim().toString().toLowerCase()))
         {
-            System.out.println("Input a valid e-mail address.");
-            callPop("Input a valid e-mail address.");
+            System.out.println("Input a valid registered IIITD e-mail address.");
+            callPop("Input a valid registered IIITD e-mail address.");
         }
         else
         {
@@ -350,5 +409,34 @@ public class Main extends Application implements Serializable
         serialize(Main.allRooms, "rooms.a");
         serialize(Main.allUsers, "users.a");
         serialize(Admin.requests, "requests.a");
+    }
+
+    public static Stage loading() throws InterruptedException
+    {
+        Stage stage=new Stage();
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.TRANSPARENT);
+        Pane root = new Pane();
+        root.setBackground(Background.EMPTY);
+        Scene scene = new Scene(root, 300, 250);
+        scene.setFill(Color.TRANSPARENT);
+
+        stage.setScene(scene);
+//        stage.setTitle("Loadin");
+
+        final ProgressIndicator pin = new ProgressIndicator();
+        pin.setProgress(-1.0f);
+        HBox hb = new HBox();
+        hb.setBackground(Background.EMPTY);
+        hb.setSpacing(5);
+        hb.setAlignment(Pos.CENTER);
+        hb.getChildren().addAll(pin);
+
+        scene.setRoot(hb);
+//        stage.show();
+//
+//        TimeUnit.SECONDS.sleep(5);
+
+        return stage;
     }
 }

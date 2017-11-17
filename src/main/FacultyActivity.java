@@ -46,7 +46,7 @@ public class FacultyActivity extends Application implements Initializable
     private static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
     @FXML
-    private JFXTextField search;
+    private JFXTextField cap;
     @FXML
     private Label tname;
     @FXML
@@ -410,7 +410,7 @@ public class FacultyActivity extends Application implements Initializable
         SimpleDateFormat format = new SimpleDateFormat("H:mm");
         for (Room i : Main.allRooms) // Traversing allRooms
         {
-            Label la1 = new Label(i.getName().toUpperCase());
+            Label la1 = new Label(i.getName().toUpperCase()+"   Capacity: "+i.getCapacity());
             la1.setStyle("-fx-font-size: 16; -fx-text-fill: white;");
 
             roomList.getItems().add(la1);
@@ -496,28 +496,40 @@ public class FacultyActivity extends Application implements Initializable
             int t = bookRoom2(room.getSelectionModel().getSelectedItem().toString().toLowerCase());
             if (t == 1)
             {
-                Main.callPop("Request Sent to Admin.");
+                Main.callPop("Room Booked Successfully.");
                 return;
             }
             else if (t == -1)
             {
                 return;
             }
+            else if (t == 5)
+            {
+                Main.callPop("Selected Room does not have required capacity");
+                return;
+            }
         }
         else
         {
+            int f = 0;
             for (Room r : Main.allRooms)
             {
                 int t = bookRoom2(r.getName());
+                f++;
                 if (t == 1)
                 {
-                    Main.callPop("Request Sent to Admin.");
+                    Main.callPop("Room Booked Successfully.");
                     return;
                 }
                 else if (t == -1)
                 {
                     return;
                 }
+            }
+            if (f == Main.allRooms.size())
+            {
+                Main.callPop("No room is available with required capacity.");
+                return;
             }
         }
         Main.callPop("Room not available.");
@@ -596,6 +608,16 @@ public class FacultyActivity extends Application implements Initializable
                     r = room;
                     break;
                 }
+            }
+            try
+            {
+                int tcap=Integer.parseInt(cap.getText().toString().trim());
+                if(tcap>r.getCapacity()) return 5;
+            }
+            catch (Exception e1)
+            {
+                Main.callPop("Enter a positive integer in capacity field.");
+                return -1;
             }
 
             System.out.println(r + " " + roomname + " " + Day + " " + format.format(startTime) + " " + format.format(endTime));

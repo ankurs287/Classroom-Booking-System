@@ -3,7 +3,9 @@ package main.utilities;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+
 /*Room class to user room detaila
 * */
 public class Room implements Serializable
@@ -12,6 +14,7 @@ public class Room implements Serializable
     int Capacity;
     ArrayList<ArrayList<Date[]>> timeIntevals; //TT
     ArrayList<Date[]> booked; // booked by user
+
     public Room(String name, int capacity)
     {
         this.name = name;
@@ -82,6 +85,7 @@ public class Room implements Serializable
     {
         return "Room{" +
                 "name='" + name + '\'' +
+                "Audience='" + Capacity + '\'' +
                 '}';
     }
 

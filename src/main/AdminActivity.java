@@ -24,6 +24,12 @@ import main.user.Student;
 import main.user.User;
 import main.utilities.Room;
 
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -34,6 +40,7 @@ import java.util.*;
 
 import static main.Main.getUpdate;
 import static main.Main.setUpdate;
+
 /*Admin Controller on Admin Login*/
 public class AdminActivity extends Application implements Initializable
 {
@@ -52,6 +59,8 @@ public class AdminActivity extends Application implements Initializable
     private JFXComboBox room;
     @FXML
     private JFXTextArea reason;
+    @FXML
+    private JFXTextField cap;
     @FXML
     private JFXRadioButton requestsBtn, roomsDetail, roomsBooked;
 
@@ -151,7 +160,7 @@ public class AdminActivity extends Application implements Initializable
         // Traversing allRooms
         for (Room i : Main.allRooms)
         {
-            Label la1 = new Label(i.getName().toUpperCase());
+            Label la1 = new Label(i.getName().toUpperCase() + "   Capacity: " + i.getCapacity());
             la1.setStyle("-fx-font-size: 16; -fx-text-fill: white;");
 
             roomList.getItems().add(la1);
@@ -241,28 +250,40 @@ public class AdminActivity extends Application implements Initializable
             int t = bookRoom2(room.getSelectionModel().getSelectedItem().toString().toLowerCase());
             if (t == 1)
             {
-                Main.callPop("Request Sent to Admin.");
+                Main.callPop("Room Booked Successfully.");
                 return;
             }
             else if (t == -1)
             {
                 return;
             }
+            else if (t == 5)
+            {
+                Main.callPop("Selected Room does not have required capacity");
+                return;
+            }
         }
         else
         {
+            int f = 0;
             for (Room r : Main.allRooms)
             {
                 int t = bookRoom2(r.getName());
+                f++;
                 if (t == 1)
                 {
-                    Main.callPop("Request Sent to Admin.");
+                    Main.callPop("Room Booked Successfully.");
                     return;
                 }
                 else if (t == -1)
                 {
                     return;
                 }
+            }
+            if (f == Main.allRooms.size())
+            {
+                Main.callPop("No room is available with required capacity.");
+                return;
             }
         }
         Main.callPop("Room not available.");
@@ -341,6 +362,15 @@ public class AdminActivity extends Application implements Initializable
                     r = room;
                     break;
                 }
+            }
+            try
+            {
+                int tcap = Integer.parseInt(cap.getText().toString().trim());
+                if (tcap > r.getCapacity()) return 5;
+            } catch (Exception e1)
+            {
+                Main.callPop("Enter a positive integer in capacity field.");
+                return -1;
             }
 
             System.out.println(r + " " + roomname + " " + Day + " " + format.format(startTime) + " " + format.format(endTime));
@@ -555,6 +585,13 @@ public class AdminActivity extends Application implements Initializable
                             {
                                 ar.set(3, "1");
                                 System.out.println("Request Accepted");
+                                try
+                                {
+                                    sendMail(finalStudent.getEmail(), "Your request for booking " + k + " room on " + new SimpleDateFormat("dd/M/yyyy").format(i.get(1)) + " from " + format.format(i.get(1)) + " to " + format.format(i.get(2)) + " is accepted.");
+                                } catch (Exception wer)
+                                {
+                                    System.out.println("email not sent");
+                                }
                                 break;
                             }
                         }
@@ -606,6 +643,13 @@ public class AdminActivity extends Application implements Initializable
                             if (((Date) ar.get(0)).compareTo((Date) i.get(1)) == 0 && ((Date) ar.get(1)).compareTo((Date) i.get(2)) == 0)
                             {
                                 System.out.println("Removed");
+                                try
+                                {
+                                    sendMail(finalStudent.getEmail(), "Your request for booking " + k + " room on " + new SimpleDateFormat("dd/M/yyyy").format(i.get(1)) + " from " + format.format(i.get(1)) + " to " + format.format(i.get(2)) + " is rejected.");
+                                } catch (Exception ew)
+                                {
+                                    System.out.println("email not sent");
+                                }
                                 ar.set(3, "2");
                                 break;
                             }
@@ -667,5 +711,49 @@ public class AdminActivity extends Application implements Initializable
         if (requestsBtn.isSelected()) viewRequests();
         else if (roomsBooked.isSelected()) bookedRoom();
         else if (roomsDetail.isSelected()) viewAllRooms();
+    }
+
+    private static void sendMail(String mail, String sub)
+    {
+        final String user = "classroom.booking.system@gmail.com";//change accordingly
+        final String password = "ankur+anvit";//change accordingly
+
+        String to = mail;//change accordingly
+
+        //Get the session object
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator()
+        {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication()
+            {
+                return new PasswordAuthentication(user, password);
+            }
+        });
+
+        //Compose the message
+        try
+        {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(user));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject("Request Status: Classroom Booking System");
+            String messageBody = sub;
+            message.setText(messageBody);
+
+            //send the message
+            Transport.send(message);
+
+            System.out.println("message sent successfully...");
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("Try again after sometime.");
+        }
     }
 }

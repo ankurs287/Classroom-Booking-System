@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 import static main.Main.deserialize;
 import static main.Main.serialize;
@@ -56,7 +57,8 @@ public class Creator
                     tempTimeslot[i - 6] = data[i].split(" ")[0];
                     tempRooms[i - 6] = data[i].split(" ")[1];
 
-                    Main.allRooms.add(new Room(data[i].split(" ")[1], 100));
+                    int[] capacity=new int[]{60, 150};
+                    Main.allRooms.add(new Room(data[i].split(" ")[1], capacity[new Random().nextInt(2)]));
 
                     SimpleDateFormat format = new SimpleDateFormat("H:mm");
                     for (Room r : Main.allRooms)
